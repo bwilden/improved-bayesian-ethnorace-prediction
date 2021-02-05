@@ -1,8 +1,7 @@
 # Florida
 
-state_path = "raw-data/florida/"
-
-files <- list.files(path = paste0(state_path, "20170207_VoterDetail"), pattern = "*.txt", full.names = T)
+files <- list.files(path = here("raw-data", "florida", "20170207_VoterDetail"), 
+                    pattern = "*.txt", full.names = T)
 
 fl <- map_df(files, ~read_tsv(., guess_max = 4e4, col_names = F,
                               col_types = cols(.default = "c")))
@@ -37,12 +36,6 @@ fl_clean <- fl %>%
          birth_year = format(as.Date(X22, format = "%m/%d/%Y"), "%Y"),
          party = case_when(X24 %in% c("REP", "DEM") ~ X24, TRUE ~ "UNA"))
 
-missing_lasts <- fl_clean %>% 
-  select(last_name) %>% 
-  filter(!(last_name %in% surnames$last_name)) %>% 
-  group_by(last_name) %>% 
-  summarise(n())
-
 # fl_clean %>% 
 #   select(full_address) %>% 
 #   distinct() %>% 
@@ -51,13 +44,13 @@ missing_lasts <- fl_clean %>%
 
 # Clean Data --------------------------------------------------------------
 
-fl_geo <- read_csv(paste0(state_path, "fl_geocode.csv"), guess_max = 1e7) %>% 
-  select(full_address, block = `Full FIPS`)
+fl_geo <- read_csv(here("raw-data", "florida", "fl_geocode.csv"), guess_max = 1e7) %>% 
+  select(full_address, block = `Full FIPS`, place = `Place FIPS`)
 
 florida <- fl_clean %>% 
   left_join(fl_geo, by = "full_address") %>% 
   mutate(county = str_sub(block, 1, 5)) %>% 
-  select(first_name, last_name, female, party, apartment, birth_year, state, zip, county, block, race)
+  select(first_name, last_name, female, party, apartment, birth_year, state, zip, county, place, block, race)
 
-save(florida, file = "data/florida.rda")
+save(florida, file = here("data", "florida.rda"))
 

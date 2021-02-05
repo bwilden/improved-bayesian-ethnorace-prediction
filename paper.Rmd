@@ -1,0 +1,49 @@
+---
+title: "Improved Bayesian Ethnorace Prediction"
+author: "Bertrand Wilden"
+date: Sys.Date()
+output:
+  pdf_document: default
+header-includes:
+- \usepackage{setspace}\doublespacing
+- \usepackage{amsmath}
+- \usepackage{floatrow} \floatsetup[figure]{capposition=top}
+indent: yes
+fontsize: 12pt
+bibliography: bibli.json
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, cache.lazy = FALSE)
+```
+
+```{r libraries}
+library(tidyverse)
+library(ggthemes)
+library(gridExtra)
+library(here)
+```
+
+
+### Abstract
+
+Quantitative social science research on race and ethnicity is often constrained by the lack of available individual-level data with these markers. In response to this issue, methods have been developed to predict individuals' race and ethnicity using Bayes' rule. Racial distributions from the US Census Surname List are combined with distributions from geolocations, such as Census blocks or zip codes, to yield predicted probabilities of individuals' race and ethnicity. I expand upon existing methods by incorporating information from a nationwide list of first names as well as from residence characteristics. Along with some other adjustments, these improvements lead to substantial gains in predictive performance when validated against official state voter files. The largest of these predictive gains are found for African Americans and Hispanics — groups which existing methods find difficult to predict accurately without fine-grain geolocation information.
+
+### Introduction
+
+
+
+### Method
+
+
+
+### Validation
+
+
+
+### Conclusion
+
+
+
+### References
+

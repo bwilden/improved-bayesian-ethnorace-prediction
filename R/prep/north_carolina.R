@@ -1,9 +1,6 @@
 # North Carolina
 
-
-state_path <- "raw-data/north_carolina/"
-
-nc <- read_tsv(paste0(state_path, "ncvoter_Statewide.txt"))
+nc <- read_tsv(here("raw-data", "north_carolina", "ncvoter_Statewide.txt"))
 
 
 common_surname_prefixes <- c("MC", "DE", "VAN", "DEL", "ST", "LA", "DI", 
@@ -32,11 +29,11 @@ nc_clean <- nc %>%
          party = case_when(party_cd %in% c("REP", "DEM") ~  party_cd, TRUE ~ "UNA"))
 
 
-missing_lasts <- nc_clean %>% 
-  select(last_name) %>% 
-  filter(!(last_name %in% surnames$last_name)) %>% 
-  group_by(last_name) %>% 
-  summarise(n())
+# missing_lasts <- nc_clean %>% 
+#   select(last_name) %>% 
+#   filter(!(last_name %in% surnames$last_name)) %>% 
+#   group_by(last_name) %>% 
+#   summarise(n())
 
 
 # nc_clean %>% 
@@ -48,16 +45,16 @@ missing_lasts <- nc_clean %>%
 
 # Clean Data --------------------------------------------------------------
 
-nc_geo <- read_csv(paste0(state_path, "nc_geocode.csv"), guess_max = 1e6) %>% 
-    select(full_address, block = `Full FIPS`)
+nc_geo <- read_csv(here("raw-data", "north_carolina", "nc_geocode.csv"), guess_max = 1e6) %>% 
+    select(full_address, block = `Full FIPS`, place = `Place FIPS`)
   
 north_carolina <- nc_clean %>% 
   left_join(nc_geo, by = "full_address") %>% 
   mutate(block = if_else(is.na(state), NA_character_, block),
          state = if_else(is.na(state), "NC", state),
          county = str_sub(block, 1, 5)) %>% 
-  select(first_name, last_name, female, party, apartment, birth_year, state, zip, county, block, race)
+  select(first_name, last_name, female, party, apartment, birth_year, state, zip, county, place, block, race)
 
-save(north_carolina, file = "data/north_carolina.rda")  
+save(north_carolina, file = here("data", "north_carolina.rda"))  
  
 
