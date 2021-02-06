@@ -1,0 +1,943 @@
+[
+    {
+        "id": "voicu2018",
+        "DOI": "10.1080/2330443X.2018.1427012",
+        "ISSN": "2330-443X",
+        "URL": "https://www.tandfonline.com/doi/full/10.1080/2330443X.2018.1427012",
+        "accessed": {
+            "date-parts": [
+                [
+                    18
+                ]
+            ]
+        },
+        "author": [
+            {
+                "family": "Voicu",
+                "given": "Ioan"
+            }
+        ],
+        "container-title": "Statistics and Public Policy",
+        "container-title-short": "Statistics and Public Policy",
+        "issue": "1",
+        "issued": {
+            "date-parts": [
+                [
+                    2018,
+                    1
+                ]
+            ]
+        },
+        "language": "en",
+        "page": "1-13",
+        "source": "DOI.org (Crossref)",
+        "title": "Using First Name Information to Improve Race and Ethnicity Classification",
+        "type": "article-journal",
+        "volume": "5"
+    },
+    {
+        "id": "velez2019",
+        "DOI": "10.1111/ajps.12427",
+        "ISSN": "0092-5853, 1540-5907",
+        "URL": "https://onlinelibrary.wiley.com/doi/abs/10.1111/ajps.12427",
+        "accessed": {
+            "date-parts": [
+                [
+                    17
+                ]
+            ]
+        },
+        "author": [
+            {
+                "family": "Velez",
+                "given": "Yamil Ricardo"
+            },
+            {
+                "family": "Newman",
+                "given": "Benjamin J."
+            }
+        ],
+        "container-title": "American Journal of Political Science",
+        "container-title-short": "American Journal of Political Science",
+        "issue": "4",
+        "issued": {
+            "date-parts": [
+                [
+                    2019,
+                    10
+                ]
+            ]
+        },
+        "language": "en",
+        "page": "808-823",
+        "source": "DOI.org (Crossref)",
+        "title": "Tuning In, Not Turning Out: Evaluating the Impact of Ethnic Television on Political Participation",
+        "title-short": "Tuning In, Not Turning Out",
+        "type": "article-journal",
+        "volume": "63"
+    },
+    {
+        "id": "tzioumis2018",
+        "DOI": "10.1038/sdata.2018.25",
+        "ISSN": "2052-4463",
+        "URL": "http://www.nature.com/articles/sdata201825",
+        "accessed": {
+            "date-parts": [
+                [
+                    18
+                ]
+            ]
+        },
+        "author": [
+            {
+                "family": "Tzioumis",
+                "given": "Konstantinos"
+            }
+        ],
+        "container-title": "Scientific Data",
+        "container-title-short": "Sci Data",
+        "issue": "1",
+        "issued": {
+            "date-parts": [
+                [
+                    2018,
+                    12
+                ]
+            ]
+        },
+        "language": "en",
+        "page": "180025",
+        "source": "DOI.org (Crossref)",
+        "title": "Demographic aspects of first names",
+        "type": "article-journal",
+        "volume": "5"
+    },
+    {
+        "id": "studdert2020",
+        "DOI": "10.1056/NEJMsa1916744",
+        "ISSN": "0028-4793, 1533-4406",
+        "URL": "http://www.nejm.org/doi/10.1056/NEJMsa1916744",
+        "accessed": {
+            "date-parts": [
+                [
+                    17
+                ]
+            ]
+        },
+        "author": [
+            {
+                "family": "Studdert",
+                "given": "David M."
+            },
+            {
+                "family": "Zhang",
+                "given": "Yifan"
+            },
+            {
+                "family": "Swanson",
+                "given": "Sonja A."
+            },
+            {
+                "family": "Prince",
+                "given": "Lea"
+            },
+            {
+                "family": "Rodden",
+                "given": "Jonathan A."
+            },
+            {
+                "family": "Holsinger",
+                "given": "Erin E."
+            },
+            {
+                "family": "Spittal",
+                "given": "Matthew J."
+            },
+            {
+                "family": "Wintemute",
+                "given": "Garen J."
+            },
+            {
+                "family": "Miller",
+                "given": "Matthew"
+            }
+        ],
+        "container-title": "New England Journal of Medicine",
+        "container-title-short": "N Engl J Med",
+        "issue": "23",
+        "issued": {
+            "date-parts": [
+                [
+                    2020,
+                    6,
+                    4
+                ]
+            ]
+        },
+        "language": "en",
+        "page": "2220-2229",
+        "source": "DOI.org (Crossref)",
+        "title": "Handgun Ownership and Suicide in California",
+        "type": "article-journal",
+        "volume": "382"
+    },
+    {
+        "id": "shah2017",
+        "DOI": "10.1017/rep.2016.27",
+        "ISSN": "2056-6085",
+        "URL": "https://www.cambridge.org/core/product/identifier/S2056608516000271/type/journal_article",
+        "accessed": {
+            "date-parts": [
+                [
+                    17
+                ]
+            ]
+        },
+        "author": [
+            {
+                "family": "Shah",
+                "given": "Paru R."
+            },
+            {
+                "family": "Davis",
+                "given": "Nicholas R."
+            }
+        ],
+        "container-title": "The Journal of Race, Ethnicity, and Politics",
+        "container-title-short": "J. Race Ethnicity Politics",
+        "issue": "1",
+        "issued": {
+            "date-parts": [
+                [
+                    2017,
+                    3
+                ]
+            ]
+        },
+        "language": "en",
+        "page": "124-139",
+        "source": "DOI.org (Crossref)",
+        "title": "Comparing Three Methods of Measuring Race/Ethnicity",
+        "type": "article-journal",
+        "volume": "2"
+    },
+    {
+        "id": "rish2001",
+        "author": [
+            {
+                "family": "Rish",
+                "given": "Irina"
+            }
+        ],
+        "container-title": "IJCAI 2001 workshop on empirical methods in artificial intelligence",
+        "issue": "22",
+        "issued": {
+            "date-parts": [
+                [
+                    2001
+                ]
+            ]
+        },
+        "language": "en",
+        "page": "41-46",
+        "source": "Zotero",
+        "title": "An empirical study of the naive Bayes classiﬁer",
+        "type": "article-journal",
+        "volume": "3"
+    },
+    {
+        "id": "omi2014",
+        "author": [
+            {
+                "family": "Omi",
+                "given": "Michael"
+            },
+            {
+                "family": "Winant",
+                "given": "Howard"
+            }
+        ],
+        "issued": {
+            "date-parts": [
+                [
+                    2014
+                ]
+            ]
+        },
+        "number-of-pages": "344",
+        "publisher": "Routledge",
+        "title": "Racial Formation in the United States",
+        "type": "book"
+    },
+    {
+        "id": "lewis1998",
+        "DOI": "10.1007/BFb0026666",
+        "ISBN": "978-3-540-64417-0 978-3-540-69781-7",
+        "URL": "http://link.springer.com/10.1007/BFb0026666",
+        "accessed": {
+            "date-parts": [
+                [
+                    23
+                ]
+            ]
+        },
+        "author": [
+            {
+                "family": "Lewis",
+                "given": "David D."
+            }
+        ],
+        "collection-editor": [
+            {
+                "family": "Carbonell",
+                "given": "Jaime G."
+            },
+            {
+                "family": "Siekmann",
+                "given": "Jörg"
+            },
+            {
+                "family": "Goos",
+                "given": "G."
+            },
+            {
+                "family": "Hartmanis",
+                "given": "J."
+            },
+            {
+                "family": "van Leeuwen",
+                "given": "J."
+            }
+        ],
+        "container-title": "Machine Learning: ECML-98",
+        "editor": [
+            {
+                "family": "Nédellec",
+                "given": "Claire"
+            },
+            {
+                "family": "Rouveirol",
+                "given": "Céline"
+            }
+        ],
+        "issued": {
+            "date-parts": [
+                [
+                    1998
+                ]
+            ]
+        },
+        "language": "en",
+        "note": "Series Title: Lecture Notes in Computer Science",
+        "page": "4-15",
+        "publisher": "Springer Berlin Heidelberg",
+        "publisher-place": "Berlin, Heidelberg",
+        "source": "DOI.org (Crossref)",
+        "title": "Naive (Bayes) at forty: The independence assumption in information retrieval",
+        "title-short": "Naive (Bayes) at forty",
+        "type": "chapter",
+        "volume": "1398"
+    },
+    {
+        "id": "kuk2020",
+        "DOI": "10.1080/21565503.2020.1773280",
+        "ISSN": "2156-5503, 2156-5511",
+        "URL": "https://www.tandfonline.com/doi/full/10.1080/21565503.2020.1773280",
+        "accessed": {
+            "date-parts": [
+                [
+                    14
+                ]
+            ]
+        },
+        "author": [
+            {
+                "family": "Kuk",
+                "given": "John"
+            },
+            {
+                "family": "Hajnal",
+                "given": "Zoltan"
+            },
+            {
+                "family": "Lajevardi",
+                "given": "Nazita"
+            }
+        ],
+        "container-title": "Politics, Groups, and Identities",
+        "container-title-short": "Politics, Groups, and Identities",
+        "issued": {
+            "date-parts": [
+                [
+                    2020,
+                    6,
+                    4
+                ]
+            ]
+        },
+        "language": "en",
+        "page": "1-9",
+        "source": "DOI.org (Crossref)",
+        "title": "A disproportionate burden: strict voter identification laws and minority turnout",
+        "title-short": "A disproportionate burden",
+        "type": "article-journal"
+    },
+    {
+        "id": "imai2016",
+        "DOI": "10.1093/pan/mpw001",
+        "ISSN": "1047-1987, 1476-4989",
+        "URL": "https://www.cambridge.org/core/product/identifier/S1047198700010962/type/journal_article",
+        "accessed": {
+            "date-parts": [
+                [
+                    18
+                ]
+            ]
+        },
+        "author": [
+            {
+                "family": "Imai",
+                "given": "Kosuke"
+            },
+            {
+                "family": "Khanna",
+                "given": "Kabir"
+            }
+        ],
+        "container-title": "Political Analysis",
+        "container-title-short": "Polit. anal.",
+        "issue": "2",
+        "issued": {
+            "date-parts": [
+                [
+                    2016
+                ]
+            ]
+        },
+        "language": "en",
+        "page": "263-272",
+        "source": "DOI.org (Crossref)",
+        "title": "Improving Ecological Inference by Predicting Individual Ethnicity from Voter Registration Records",
+        "type": "article-journal",
+        "volume": "24"
+    },
+    {
+        "id": "hersh2016",
+        "DOI": "10.1111/ajps.12179",
+        "ISSN": "00925853",
+        "URL": "http://doi.wiley.com/10.1111/ajps.12179",
+        "accessed": {
+            "date-parts": [
+                [
+                    16
+                ]
+            ]
+        },
+        "author": [
+            {
+                "family": "Hersh",
+                "given": "Eitan D."
+            },
+            {
+                "family": "Nall",
+                "given": "Clayton"
+            }
+        ],
+        "container-title": "American Journal of Political Science",
+        "container-title-short": "American Journal of Political Science",
+        "issue": "2",
+        "issued": {
+            "date-parts": [
+                [
+                    2016,
+                    4
+                ]
+            ]
+        },
+        "language": "en",
+        "page": "289-303",
+        "source": "DOI.org (Crossref)",
+        "title": "The Primacy of Race in the Geography of Income-Based Voting: New Evidence from Public Voting Records: RACE AND INCOME-BASED VOTING",
+        "title-short": "The Primacy of Race in the Geography of Income-Based Voting",
+        "type": "article-journal",
+        "volume": "60"
+    },
+    {
+        "id": "grumbach2020",
+        "DOI": "10.1017/S0003055419000637",
+        "ISSN": "0003-0554, 1537-5943",
+        "URL": "https://www.cambridge.org/core/product/identifier/S0003055419000637/type/journal_article",
+        "accessed": {
+            "date-parts": [
+                [
+                    22
+                ]
+            ]
+        },
+        "author": [
+            {
+                "family": "Grumbach",
+                "given": "Jacob M."
+            },
+            {
+                "family": "Sahn",
+                "given": "Alexander"
+            }
+        ],
+        "container-title": "American Political Science Review",
+        "container-title-short": "Am Polit Sci Rev",
+        "issue": "1",
+        "issued": {
+            "date-parts": [
+                [
+                    2020,
+                    2
+                ]
+            ]
+        },
+        "language": "en",
+        "page": "206-221",
+        "source": "DOI.org (Crossref)",
+        "title": "Race and Representation in Campaign Finance",
+        "type": "article-journal",
+        "volume": "114"
+    },
+    {
+        "id": "grumbach2020a",
+        "DOI": "10.1007/s11109-020-09619-0",
+        "ISSN": "0190-9320, 1573-6687",
+        "URL": "http://link.springer.com/10.1007/s11109-020-09619-0",
+        "accessed": {
+            "date-parts": [
+                [
+                    22
+                ]
+            ]
+        },
+        "author": [
+            {
+                "family": "Grumbach",
+                "given": "Jacob M."
+            },
+            {
+                "family": "Sahn",
+                "given": "Alexander"
+            },
+            {
+                "family": "Staszak",
+                "given": "Sarah"
+            }
+        ],
+        "container-title": "Political Behavior",
+        "container-title-short": "Polit Behav",
+        "issued": {
+            "date-parts": [
+                [
+                    2020,
+                    6,
+                    2
+                ]
+            ]
+        },
+        "language": "en",
+        "source": "DOI.org (Crossref)",
+        "title": "Gender, Race, and Intersectionality in Campaign Finance",
+        "type": "article-journal"
+    },
+    {
+        "id": "ghitza",
+        "author": [
+            {
+                "family": "Ghitza",
+                "given": "Yair"
+            },
+            {
+                "family": "Gelman",
+                "given": "Andrew"
+            }
+        ],
+        "language": "en",
+        "page": "25",
+        "source": "Zotero",
+        "title": "Voter Registration Databases and MRP: Toward the Use of Large-Scale Databases in Public Opinion Research",
+        "type": "article-journal"
+    },
+    {
+        "id": "fraga2018",
+        "author": [
+            {
+                "family": "Fraga",
+                "given": "Bernard L."
+            }
+        ],
+        "issued": {
+            "date-parts": [
+                [
+                    2018
+                ]
+            ]
+        },
+        "number-of-pages": "274",
+        "publisher": "Cambridge University Press",
+        "title": "The Turnout Gap. Race, Ethnicity, and Political Inequality in a Diversifying America",
+        "type": "book"
+    },
+    {
+        "id": "enos2019",
+        "DOI": "10.1017/S0003055419000340",
+        "ISSN": "0003-0554, 1537-5943",
+        "URL": "https://www.cambridge.org/core/product/identifier/S0003055419000340/type/journal_article",
+        "accessed": {
+            "date-parts": [
+                [
+                    17
+                ]
+            ]
+        },
+        "author": [
+            {
+                "family": "Enos",
+                "given": "Ryan D."
+            },
+            {
+                "family": "Kaufman",
+                "given": "Aaron R."
+            },
+            {
+                "family": "Sands",
+                "given": "Melissa L."
+            }
+        ],
+        "container-title": "American Political Science Review",
+        "container-title-short": "Am Polit Sci Rev",
+        "issue": "4",
+        "issued": {
+            "date-parts": [
+                [
+                    2019,
+                    11
+                ]
+            ]
+        },
+        "language": "en",
+        "page": "1012-1028",
+        "source": "DOI.org (Crossref)",
+        "title": "Can Violent Protest Change Local Policy Support? Evidence from the Aftermath of the 1992 Los Angeles Riot",
+        "title-short": "Can Violent Protest Change Local Policy Support?",
+        "type": "article-journal",
+        "volume": "113"
+    },
+    {
+        "id": "elliott2009",
+        "DOI": "10.1007/s10742-009-0047-1",
+        "author": [
+            {
+                "family": "Elliott",
+                "given": "Marc N."
+            },
+            {
+                "family": "Morrison",
+                "given": "Peter A."
+            },
+            {
+                "family": "Fremont",
+                "given": "Allen"
+            },
+            {
+                "family": "McCaffrey",
+                "given": "Daniel F."
+            },
+            {
+                "family": "Pantoja",
+                "given": "Philip"
+            },
+            {
+                "family": "Lurie",
+                "given": "Nicole"
+            }
+        ],
+        "container-title": "Health Services and Outcomes Research Methodology",
+        "issue": "2",
+        "issued": {
+            "date-parts": [
+                [
+                    2009
+                ]
+            ]
+        },
+        "page": "69-83",
+        "title": "Using the Census Bureau’s surname list to improve estimates of race/ethnicity and associated disparities",
+        "type": "article-journal",
+        "volume": "9"
+    },
+    {
+        "id": "crabtree2018",
+        "DOI": "10.15195/v5.a2",
+        "ISSN": "23306696",
+        "URL": "https://www.sociologicalscience.com/articles-v5-2-21/",
+        "accessed": {
+            "date-parts": [
+                [
+                    18
+                ]
+            ]
+        },
+        "author": [
+            {
+                "family": "Crabtree",
+                "given": "Charles"
+            },
+            {
+                "family": "Chykina",
+                "given": "Volha"
+            }
+        ],
+        "container-title": "Sociological Science",
+        "container-title-short": "SocScience",
+        "issued": {
+            "date-parts": [
+                [
+                    2018
+                ]
+            ]
+        },
+        "language": "en",
+        "page": "21-28",
+        "source": "DOI.org (Crossref)",
+        "title": "Last Name Selection in Audit Studies",
+        "type": "article-journal",
+        "volume": "5"
+    },
+    {
+        "id": "cascio2012",
+        "author": [
+            {
+                "family": "Cascio",
+                "given": "Elizabeth U"
+            },
+            {
+                "family": "Washington",
+                "given": "Ebonya L"
+            }
+        ],
+        "issued": {
+            "date-parts": [
+                [
+                    2012
+                ]
+            ]
+        },
+        "language": "en",
+        "page": "53",
+        "source": "Zotero",
+        "title": "Valuing the Vote: the Redistribution of Voting Rights and State Funds Following the Voting Rights Act of 1965",
+        "type": "article-journal"
+    },
+    {
+        "id": "cantoni2020",
+        "DOI": "10.1257/app.20180306",
+        "ISSN": "1945-7782, 1945-7790",
+        "URL": "https://pubs.aeaweb.org/doi/10.1257/app.20180306",
+        "accessed": {
+            "date-parts": [
+                [
+                    22
+                ]
+            ]
+        },
+        "author": [
+            {
+                "family": "Cantoni",
+                "given": "Enrico"
+            }
+        ],
+        "container-title": "American Economic Journal: Applied Economics",
+        "container-title-short": "American Economic Journal: Applied Economics",
+        "issue": "1",
+        "issued": {
+            "date-parts": [
+                [
+                    2020,
+                    1,
+                    1
+                ]
+            ]
+        },
+        "language": "en",
+        "page": "61-85",
+        "source": "DOI.org (Crossref)",
+        "title": "A Precinct Too Far: Turnout and Voting Costs",
+        "title-short": "A Precinct Too Far",
+        "type": "article-journal",
+        "volume": "12"
+    },
+    {
+        "id": "domingos1997",
+        "author": [
+            {
+                "family": "Domingos",
+                "given": "Pedro"
+            },
+            {
+                "family": "Pazzani",
+                "given": "Michael"
+            }
+        ],
+        "container-title": "Machine Learning",
+        "issued": {
+            "date-parts": [
+                [
+                    1997
+                ]
+            ]
+        },
+        "page": "103-130",
+        "title": "Beyond Independence: Conditions for the Optimality of the Simple Bayesian Classifier",
+        "type": "article-journal",
+        "volume": "29"
+    },
+    {
+        "id": "enos2016",
+        "DOI": "10.1111/ajps.12156",
+        "ISSN": "0092-5853, 1540-5907",
+        "URL": "https://onlinelibrary.wiley.com/doi/abs/10.1111/ajps.12156",
+        "accessed": {
+            "date-parts": [
+                [
+                    18
+                ]
+            ]
+        },
+        "author": [
+            {
+                "family": "Enos",
+                "given": "Ryan D."
+            }
+        ],
+        "container-title": "American Journal of Political Science",
+        "container-title-short": "American Journal of Political Science",
+        "issue": "1",
+        "issued": {
+            "date-parts": [
+                [
+                    2016,
+                    1
+                ]
+            ]
+        },
+        "language": "en",
+        "page": "123-142",
+        "source": "DOI.org (Crossref)",
+        "title": "What the Demolition of Public Housing Teaches Us about the Impact of Racial Threat on Political Behavior",
+        "type": "article-journal",
+        "volume": "60"
+    },
+    {
+        "id": "lauderdale2000",
+        "author": [
+            {
+                "family": "Lauderdale",
+                "given": "Diane S"
+            },
+            {
+                "family": "Kestenbaum",
+                "given": "Bert"
+            }
+        ],
+        "container-title": "Population and Development Review",
+        "issued": {
+            "date-parts": [
+                [
+                    2000
+                ]
+            ]
+        },
+        "language": "en",
+        "page": "18",
+        "source": "Zotero",
+        "title": "Asian American ethnic identification by surname",
+        "type": "article-journal",
+        "volume": "19"
+    },
+    {
+        "id": "fotheringham1991",
+        "DOI": "10.1068/a231025",
+        "ISSN": "0308-518X, 1472-3409",
+        "URL": "http://journals.sagepub.com/doi/10.1068/a231025",
+        "accessed": {
+            "date-parts": [
+                [
+                    19
+                ]
+            ]
+        },
+        "author": [
+            {
+                "family": "Fotheringham",
+                "given": "A S"
+            },
+            {
+                "family": "Wong",
+                "given": "D W S"
+            }
+        ],
+        "container-title": "Environment and Planning A: Economy and Space",
+        "container-title-short": "Environ Plan A",
+        "issue": "7",
+        "issued": {
+            "date-parts": [
+                [
+                    1991,
+                    7
+                ]
+            ]
+        },
+        "language": "en",
+        "page": "1025-1044",
+        "source": "DOI.org (Crossref)",
+        "title": "The Modifiable Areal Unit Problem in Multivariate Statistical Analysis",
+        "type": "article-journal",
+        "volume": "23"
+    },
+    {
+        "id": "keele2018",
+        "DOI": "10.1093/cesifo/ify004",
+        "ISSN": "1610-241X, 1612-7501",
+        "URL": "https://academic.oup.com/cesifo/article/64/2/127/4939308",
+        "accessed": {
+            "date-parts": [
+                [
+                    12
+                ]
+            ]
+        },
+        "author": [
+            {
+                "family": "Keele",
+                "given": "Luke"
+            },
+            {
+                "family": "Titiunik",
+                "given": "Rocío"
+            }
+        ],
+        "container-title": "CESifo Economic Studies",
+        "issue": "2",
+        "issued": {
+            "date-parts": [
+                [
+                    2018,
+                    6,
+                    1
+                ]
+            ]
+        },
+        "language": "en",
+        "page": "127-149",
+        "source": "DOI.org (Crossref)",
+        "title": "Geographic Natural Experiments with Interference: The Effect of All-Mail Voting on Turnout in Colorado",
+        "title-short": "Geographic Natural Experiments with Interference",
+        "type": "article-journal",
+        "volume": "64"
+    }
+]
