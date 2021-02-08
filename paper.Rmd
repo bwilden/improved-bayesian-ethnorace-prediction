@@ -6,10 +6,10 @@ output:
   pdf_document: default
 header-includes:
 - \usepackage{setspace}\doublespacing
-- \usepackage{amsmath}
+- \usepackage{amsmath, physics}
 - \usepackage{floatrow} \floatsetup[figure]{capposition=top}
 indent: yes
-fontsize: 12pt
+fontsize: 11pt
 bibliography: bibli.json
 ---
 
@@ -59,6 +59,8 @@ There are a few benefits to using the Census ethnoracial categorization. These g
 
 ## Inputs
 
+
+
 ### First Names
 
 The first names list I use comes from Tzioumis (2017). It is drawn from mortgage applicants and contains ethnorace counts in each of the six categories across 4,250 first names. Unlike Census data, which form the basis for much of my other data sources, this list of first names may be unrepresentative of the larger US population. To the extent that first name distributions differ by ethnorace given employment status, for example, this may be a concern. But the predictive benefits from using first name data, as I will demonstrate, likely overwhelms these worries in most contexts.
@@ -91,11 +93,23 @@ These data refer to ethnorace distributions over multi-unit housing occupancy. I
 
 # Methodology
 
+In general terms, the method described here computes predicted probabilities for each of the six aforementioned ethnorace categories for each individual. Then, each individual is classified into the category corresponding to the highest predicted probability. These predicted probabilities can be stated more formally as the conditional probability of identifying as a particular ethnorace for an individual with a particular profile of first name, last name, geolocation, party ID, age, gender, and address type. Bayes' rule provides a template for how to answer this sort of conditional probability problem.
 
-$$
-Pr(R|X) = \frac{Pr(X|R)Pr(R)}{Pr(X)}
-$$
+\begin{equation}
+Pr(R=r|X) = \frac{Pr(X|R=r)Pr(R=r)}{Pr(X)}
+\end{equation}
 
+Where $R$ is an individual's true ethnorace, $r$ is one of six possible ethnorace categories (White, Black, Asian, Native American, Hispanic, or Other race), and $X$ is the joint probability of an individual having a particular profile of attributes (first name, last name, geolocation, party ID, age, gender, and address type). Unfortunately, the joint probability $X$ in Equation is intractable due to both data constraints and the astronomically large number of combinations of possible attribute profiles. If however, we assume conditional independence of ethnorace among each attribute in $X$, we can rewrite Equation (1) in terms of less complex conditional probabilities:
+
+\begin{equation}
+Pr(R=r|X) = \frac{Pr(R=r|x')\prod\limits_{j=1}^6Pr(x_j|R=r)}{\sum\limits_{i=1}^{6} Pr(R=r_i|x')\prod\limits_{j=1}^6Pr(x_j|R=r_i)}
+\end{equation}
+
+Where $x$ is the vector of individual attributes indexed by $j$. The particular attribute $x'$ comes from the use of the chain rule when decomposing the joint probability $Pr(R=r, X)$. The choice of which attribute to use for $x'$ is atheoretical, but all previous prediction methods have used last names [@elliott2009; @imai2016; @voicu2018]. During my validation exercises, I found that the choice of $x'$ has potentially large consequences for predictive performance. Using last names for $x'$ appears to help predictions of Whites---but to the detriment of other categories. In light of these trade-offs, my method cycles through every attribute as the choice of $x'$ and computes $Pr(R=r|X)$ for each. These posterior probabilities are then averaged within each ethnorace to generate final predicted probabilities that an individual belongs to a particular ethnorace. The end result is more balanced predictions across each ethnorace category.
+
+The conditional independence assumption necessary for transforming (1) to (2) means that knowing both a particular attribute, and an individual's ethnorace, should give us no extra knowledge of any other attribute for that individual. Stated formally, $Pr(x_j|R=r,X) = Pr(x_j|R=r)$ for all $x_j$. This assumption is almost certainly violated in the present context. One example that has been demonstrated empirically is that last name distributions by race vary across regions in the US [@crabtree2018]. 
+
+Violations of the conditional independence assumption are commonplace in most applications of similar classification algorithms. Nevertheless, these prediction methods perform unreasonably well in many contexts [@lewis1998; @domingos1997; @rish2001]. This is likely because 
 
 
 # Validation
