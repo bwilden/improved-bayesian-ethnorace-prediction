@@ -22,6 +22,7 @@ library(tidyverse)
 library(ggthemes)
 library(gridExtra)
 library(here)
+library(grid)
 ```
 
 # Abstract
@@ -33,11 +34,11 @@ Quantitative social science research on race and ethnicity can be constrained by
 ```
 # Introduction
 
-Research on racial and ethnic disparities in the United States can be constrained by the lack of available individual-level data with these markers [@cascio2012; @kuk2020]. This is particularly true when racial geography is a key aspect of the research design. In these contexts, researchers are often forced to use aggregate-level data on group proportions, such as county statistics, to draw inferences. But this method is susceptible to the modifiable areal unit problem, whereby statistical bias is introduced due to arbitrary and unequal geographic unit sizes [@fotheringham1991]. Furthermore, some research designs all but require individual-level data. Geographic regression discontinuity designs---an increasingly common causal inference technique---typically relies on individually geocoded addresses [@keele2018; @velez2019; @cantoni2020]. Therefore if race or ethnicity is a central element of the research question, individual-level identifiers for these categories are likely necessary.
+Research on racial and ethnic disparities in the United States can be constrained by the lack of available individual-level data with these markers [@cascio2012; @kuk2020]. This is particularly true when racial geography is a key aspect of the research design. In these contexts, researchers are often forced to use aggregate-level data on group proportions, such as county statistics, to draw inferences. But this method is susceptible to the modifiable areal unit problem, whereby statistical bias is introduced due to arbitrary and unequal geographic unit sizes [@fotheringham1991]. Furthermore, some research designs all but require individual-level data. Geographic regression discontinuity designs---an increasingly common causal inference technique---typically relies on individually geocoded addresses [@keele2018; @velez2019; @cantoni2020]. Therefore if race or ethnicity are central elements of the research question, individual-level identifiers for these categories are likely necessary.
 
-To overcome some of these challenges, in this paper I describe a method for imputing individual ethnorace categories directly. This method uses Bayes' rule to make predictions by combining information from nationwide distributions of six ethnoracial categories over other characteristics, such as names, geographies, political party identification, among others. My implementation builds off existing methods which use a similar formula [@elliott2009; @imai2016; @voicu2018]. The method described in Imai and Khanna (2016) in particular, and the associated `R` package `wru`, has become popular in recent studies on race and ethnicity. Its application has been used in work on racial protests and voting patterns [@enos2019], disparities in campaign financing [@grumbach2020; @grumbach2020a], and public health issues such as suicide rates [@studdert2020].
+To overcome some of these challenges, in this paper I describe a method for imputing individual ethnorace categories directly. This method uses Bayes' rule to make predictions by combining information from nationwide distributions of six ethnoracial categories over other characteristics, such as names, geographies, political party identification, among others. My implementation builds off existing methods which use a similar prediction algorithm [@elliott2009; @imai2016; @voicu2018]. The method described in Imai and Khanna (2016) in particular, and the associated `R` package `wru`, has become popular in recent studies on race and ethnicity. Its application has been used in work on racial protests and voting patterns [@enos2019], disparities in campaign financing [@grumbach2020; @grumbach2020a], and public health issues such as suicide rates [@studdert2020].
 
-My ethnorace prediction method improves upon Imai and Khanna (2016) in several ways. Whereas their method only takes as inputs distributions over surnames, geolocation, political party, age, and gender, my version adds information from a nationwide list of first names [@tzioumis2018] as well as address characteristics. Additionally, I incorporate insights from the machine learning literature on the Naive Bayes algorithm. The result of these modifications is a substantial increase in predictive performance compared to Imai and Khanna (2016) in validation tests. These predictive gains are particularly strong in regards to correctly classifying African American and Hispanic individuals---especially in contexts where fine-grain geolocation data are unavailable. My method is available in an easy-to-use `R` package `bper`.[^1]
+My ethnorace prediction method improves upon Imai and Khanna (2016) in several ways. Whereas their method only takes as inputs distributions over surnames, geolocation, political party, age, and gender, my version adds information from a nationwide list of first names [@tzioumis2018] as well as address characteristics. Additionally, I incorporate insights from the machine learning literature to further improve predictive performance. The result of these modifications is a substantial increase in predictive power compared to Imai and Khanna (2016) in validation tests. These predictive gains are particularly strong in regards to correctly classifying African American and Hispanic individuals---especially in contexts where fine-grain geolocation data are unavailable. My method is available in an easy-to-use `R` package `bper`.[^1]
 
 [^1]: `bper`: Bayesian Prediction for Ethnicity and Race. <https://github.com/bwilden/bper>
 
@@ -47,53 +48,61 @@ In the next section I will provide some background on the inputs and outputs of 
 
 ## Outputs
 
-Before discussing the methodology further, it is important to first define what "predicting ethnicity or race" means. These are categories which, although relatively immutable compared to other identities, do not have universally accepted delineations and meanings [@omi2014]. I follow the convention from previous ethnorace prediction methods by using the US Census Bureau categorizations [@elliott2009; @imai2016; @voicu2018]. In this framework, individuals can be classified as non-Hispanic White, non-Hispanic Black or African American, non-Hispanic Asian and Pacific Islander, non-Hispanic American Indian and Alaska Native, Hispanic or Latino alone, and non-Hispanic Other Race.[^2] Because Hispanic identity is defined by the Census, and understood commonly, as an ethnicity, rather than a race, I use the term "ethnorace" in this paper to refer to any of the previously-mentioned categories. 
+Before discussing the methodology further, I want to first define what "predicting ethnicity or race" means. These are categories which, although relatively immutable compared to other identities, do not have universally accepted delineations and meanings [@omi2014]. I follow the convention from previous ethnorace prediction methods by using the US Census Bureau categorizations [@elliott2009; @imai2016; @voicu2018]. In this framework, individuals can be classified as non-Hispanic White, non-Hispanic Black or African American, non-Hispanic Asian and Pacific Islander, non-Hispanic American Indian and Alaska Native, Hispanic or Latino alone, and non-Hispanic Other Race.[^2] Because Hispanic identity is defined by the Census, and understood commonly, as an ethnicity, rather than a race, I use the term "ethnorace" in this paper to refer to any of the previously-mentioned categories. 
 
-[^2]: Non-Hispanic Other Race includes individuals who identify as belonging to two or more race/ethnicities, or mixed race, as well as those who may not identify with the other Census categories. 
+[^2]: Non-Hispanic Other Race includes individuals who identify as belonging to two or more race/ethnicities, as well as those who may not identify with the other Census categories. 
 
-There are a few benefits to using the Census ethnoracial categorization. These groups capture a common understanding of race and ethnicity in the US, and correspond to the groups studied most frequently in social science research. The data sources of these groups' distributions that serve as inputs to the prediction formula rely on the Census categorization. This also facilitates comparison of my method against previous ethnorace prediction methods.[^3] One downside to using the Census categories, however, is that it obscures substantial heterogeneity that may exist within each group. Within Asian Americans and Latinos, for example, there is considerable variation in terms of national ancestry. Furthermore, the unfortunate necessity of an Other Race category ensures that important sources of diversity are washed over.[^4]
+There are a few benefits to using the Census ethnoracial categorization. This set captures a common understanding of race and ethnicity in the US, and correspond to the groups studied most frequently in social science research. The data sources of these groups' distributions that serve as inputs to the prediction formula also rely on the Census categorization. This also facilitates comparison of my method against previous ethnorace prediction methods.[^3] One downside to using the Census categories, however, is that it obscures substantial heterogeneity that may exist within each group. Within Asian Americans and Latinos, for example, there is considerable variation in terms of national ancestry. Furthermore, the unfortunate necessity of an Other Race category ensures that important sources of diversity are washed over.[^4]
 
 [^3]: Unlike my method, Imai and Khanna (2016) do not include a separate category for American Indian and Alaska Native. In order to create similar comparison groups, I recode all predicted American Indian and Alaska Native individuals as Other Race during the validation exercises. If desired, however, the `bper` package will produce predicted probabilities for the American Indian and Alaska Native category.
 
-[^4]: This is hinted at empirically by the method's abysmal predictive performance for the Other Race category.
+[^4]: This is hinted at empirically by the method's poor predictive performance for the Other Race category.
 
 ## Inputs
 
-
-
 ### First Names
 
-The first names list I use comes from Tzioumis (2017). It is drawn from mortgage applicants and contains ethnorace counts in each of the six categories across 4,250 first names. Unlike Census data, which form the basis for much of my other data sources, this list of first names may be unrepresentative of the larger US population. To the extent that first name distributions differ by ethnorace given employment status, for example, this may be a concern. But the predictive benefits from using first name data, as I will demonstrate, likely overwhelms these worries in most contexts.
+The first names list I use comes from Tzioumis (2017). It is drawn from mortgage applicants and contains ethnorace counts in each of the six categories across 4,250 first names. Unlike Census data, which form the basis for much of my other data sources, this list of first names may be unrepresentative of the larger US population. To the extent that first name distributions differ by ethnorace given employment status, for example, this may be a concern. But the predictive benefits from using first name data, as I will demonstrate, likely overwhelm these worries in most contexts.
 
 ### Last Names
 
-For my last names data, I use the 2010 Census Surnames List.[^5] This list comes from the 2010 decennial Census and contains over 160,000 common US last names (those occurring 100 or more times). Like the first names list, these data include counts of individuals in each of the six ethnorace categories across each last name.
+For my last names data, I use the 2010 Census Surnames List.[^5] This list comes from the 2010 decennial Census and contains over 160,000 common US last names (those occurring 100 or more times in the population). Like the first names list, these data include counts of individuals in each of the six ethnorace categories across each last name.
 
 [^5]: <https://www.census.gov/topics/population/genealogy/data/2010_surnames.html>
 
 ### Geolocations
 
-My ethnorace distributions by geographies come from the 2010 decennial Census, accessed via IPUMS NHGIS.[^6] In descending order of mean population, these geographies include *state*, *county*, *Census place*, *ZIP code*, and *Census block*. Predictions tend to improve with more precise levels of geography. With this in mind, my implementation automatically matches each individual to the most fine-grain level of geography available. It is worth pointing out that this phenomenon is, in part, the consequence of generations of segregationist housing policies in the US. The fact that knowing an individual's ZIP code or Census block gives us so much knowledge about their race is an indictment of the US system more generally.
+My ethnorace distributions by geographies come from the 2010 decennial Census, accessed via IPUMS NHGIS.[^6] In descending order of mean population, these geographies include *state*, *county*, *Census place*, *ZIP code*, and *Census block*. Predictions tend to improve with more precise levels of geography. With this in mind, my implementation automatically matches each individual to the most fine-grain level of geography available. As an aside, it is worth pointing out that this phenomenon is, in part, the consequence of generations of segregationist housing policies in the US. The fact that knowing an individual's ZIP code or Census block gives us so much knowledge about their race is an indictment of the US system more generally.
 
 [^6]: Steven Manson, Jonathan Schroeder, David Van Riper, Tracy Kugler, and Steven Ruggles. IPUMS National Historical Geographic Information System: Version 15.0 [dataset]. Minneapolis, MN: IPUMS. 2020. http://doi.org/10.18128/D050.V15.0
 
 ### Party Identification
 
-My party identification data come from a 2012 Gallup poll.[^7] The three categories of political party I include are Republican, Democrat, and Other (including independents and "don't knows"). 
+My party identification data come from a 2012 Gallup poll.[^7] The three categories of political party I include are Republican, Democrat, and Other (including Independents and "don't knows"). The Gallup report tells me both the probability that an individual with a given ethnorace belongs to a particular political party, and the probability that an individual with a given political party identifies with a particular ethnorace. 
 
 [^7]: <https://news.gallup.com/poll/160373/democrats-racially-diverse-republicans-mostly-white.aspx>
 
 ### Age and Gender
 
-Like my geolocation data, age and gender distributions come from the 2010 decennial Census, accessed via IPUMS NHGIS. These variables do not contain much predictive power in terms of ethnoracial classification, but nevertheless, I find that their inclusion in the formula helps slightly.
+Like my geolocation data, age and gender distributions come from the 2010 decennial Census, accessed via IPUMS NHGIS. These variables do not contain much predictive power in terms of ethnoracial classification, but nevertheless, I find that their inclusion in the algorithm helps slightly.
 
 ### Multi-unit Address
 
 These data refer to ethnorace distributions over multi-unit housing occupancy. Individuals are matched to these probabilities if their address contains "Apt", "Unit", "#", or other such identifier. Unfortunately, I was not able to find these distributions for the 2010 decennial Census, so instead I use those from the year 2000. 
 
+### Data Structure
+
+The raw data sources I describe above, with the exception of party ID,[^8] all contain counts of individuals with a particular attribute (i.e. the first name JOHN, or the ZIP Code "92092") per ethnorace category. Taking proportions by cell across a particular attribute gives me $Pr(Ethnorace|Attribute)$, and taking proportions by cell across a particular ethnorace variable gives me $Pr(Attribute|Ethnorace)$. These two conditional probabilities form the building blocks of the classification algorithm described below.
+
+[^8]: Party ID percentages by ethnorace are directly available in the Gallup report.
+
+If any cell in the input data is empty (i.e. if there are no individuals of a particular ethnorace with some attribute), then the conditional probabilities $Pr(Ethnorace|Attribute)$ and $Pr(Attribute|Ethnorace)$ will be zero. As will become clear in the Methodology section, if either of those two probabilities for an individual equal zero for a given ethnorace, the algorithm will predict a zero percent probability that the individual belongs to that ethnorace. This will occur even if some other attributes about that individual predict a high probability of belonging to the ethnorace. For example, an individual could have first and last names that are highly predictive of being Hispanic, but reside in a Census block which had zero Hispanic occupants at the time of the 2010 decennial Census. Blocks typically contain only around 400 individuals---so this is a real possibility. For this person the input data says $Pr(Hispanic|Census Block) = 0$, which yields $Pr(Hispanic)= 0$ due to the structure of the formula. To resolve this issue, I apply a concept from the machine learning literature known as Laplace smoothing to my input data. This works by adding one to the count of individuals in every cell in the input data,[^9] and then calculating the conditional probabilities $Pr(Ethnorace|Attribute)$ and $Pr(Attribute|Ethnorace)$. I conjecture that absent this smoothing technique, the algorithm's predictions are too beholden to the specifics of the 2010 decennial Census. The predictions will generalize better to other time periods without the rigid assumptions of zero conditional probability for some attribute/ethnorace combinations.
+
+[^9]: In practice, only the first names, last names, and Census block data have zero counts in cells. So I only apply the Laplace smoothing to these data.
+
 # Methodology
 
-In general terms, the method described here computes predicted probabilities for each of the six aforementioned ethnorace categories for each individual. Then, each individual is classified into the category corresponding to the highest predicted probability. These predicted probabilities can be stated more formally as the conditional probability of identifying as a particular ethnorace for an individual with a particular profile of first name, last name, geolocation, party ID, age, gender, and address type. Bayes' rule provides a template for how to answer this sort of conditional probability problem.
+In general terms, the method computes predicted probabilities for each of the six aforementioned ethnorace categories for each individual. Then, each individual is classified into the category corresponding to the highest predicted probability. These predicted probabilities can be stated more formally as the conditional probability of identifying as a particular ethnorace for an individual with a particular profile of first name, last name, geolocation, party ID, age, gender, and address type. Bayes' rule provides a template for how to answer this sort of conditional probability problem.
 
 \begin{equation}
 Pr(R=r|X) = \frac{Pr(X|R=r)Pr(R=r)}{Pr(X)}
@@ -105,74 +114,460 @@ Where $R$ is an individual's true ethnorace, $r$ is one of six possible ethnorac
 Pr(R=r|X) = \frac{Pr(R=r|x')\prod\limits_{j=1}^6Pr(x_j|R=r)}{\sum\limits_{i=1}^{6} Pr(R=r_i|x')\prod\limits_{j=1}^6Pr(x_j|R=r_i)}
 \end{equation}
 
-Where $x$ is the vector of individual attributes indexed by $j$. The particular attribute $x'$ comes from the use of the chain rule when decomposing the joint probability $Pr(R=r, X)$. The choice of which attribute to use for $x'$ is atheoretical, but all previous prediction methods have used last names [@elliott2009; @imai2016; @voicu2018]. During my validation exercises, I found that the choice of $x'$ has potentially large consequences for predictive performance. Using last names for $x'$ appears to help predictions of Whites---but to the detriment of other categories. In light of these trade-offs, my method cycles through every attribute as the choice of $x'$ and computes $Pr(R=r|X)$ for each. These posterior probabilities are then averaged within each ethnorace to generate final predicted probabilities that an individual belongs to a particular ethnorace. The end result is more balanced predictions across each ethnorace category.
+Where $x$ is the vector of individual attributes indexed by $j$. The particular attribute $x'$ comes from using the chain rule to decompose the joint probability $Pr(R=r, X)$. The choice of which attribute to use for $x'$ is atheoretical, but all previous prediction methods have used last names [@elliott2009; @imai2016; @voicu2018]. During my validation exercises, I found that the choice of $x'$ has potentially large consequences for predictive performance. For example, using last names for $x'$ appears to help predictions of Whites---but to the detriment of non-Whites. In light of these trade-offs, my method cycles through every attribute as the choice of $x'$ and computes $Pr(R=r|X)$ for each. These posterior probabilities are then averaged within each ethnoracial category to generate final predicted probabilities that an individual belongs to a particular ethnorace. The end result is more balanced predictions across each ethnorace.
 
-The conditional independence assumption necessary for transforming (1) to (2) means that knowing both a particular attribute, and an individual's ethnorace, should give us no extra knowledge of any other attribute for that individual. Stated formally, $Pr(x_j|R=r,X) = Pr(x_j|R=r)$ for all $x_j$. This assumption is almost certainly violated in the present context. One example that has been demonstrated empirically is that last name distributions by race vary across regions in the US [@crabtree2018]. 
+The conditional independence assumption necessary for transforming equation (1) to (2) says that knowing both a particular attribute of an individual, and that individual's ethnorace, should give us no extra knowledge of any other attribute for that individual. Stated formally, $Pr(x_j|R=r,X) = Pr(x_j|R=r)$ for all $x_j$. This assumption is almost certainly violated in the present context. One example that has been demonstrated empirically is that last name distributions by race vary across regions in the US [@crabtree2018]. 
 
-Violations of the conditional independence assumption are commonplace in most applications of similar classification algorithms. Nevertheless, these prediction methods perform unreasonably well in many contexts [@lewis1998; @domingos1997; @rish2001]. This is likely because 
+Violations of the conditional independence assumption are commonplace in most applications of similar classification algorithms. Nevertheless, these prediction methods perform unreasonably well in many contexts [@lewis1998; @domingos1997; @rish2001]. This is likely because of the decision rule governing the final classifications---the posterior probabilities the true class do not have to necessarily be statistically valid, they only need to be higher than those of every other class to be accurately classified. For this reason, as more attribute inputs are added to the model (first names, multi-unit occupancy), I believe researchers should be cautious when trying to interpret the values of $Pr(R=r|X)$ directly. Rather, the maximum a posteriori ethnorace classifications should be used alone 
+
+[*insert section on how method deals with missing attributes*]
+
+[*insert measurement error model stuff here*]
 
 
 # Validation
+
+To test the performance of the model, I apply the predictions to the combined North Carolina and Florida State voter file. These files contain snapshots of the registered voters in their respective states and provide individual-level data for first names, last names, address, political party, age, gender, and crucially self-identified ethnorace. Combined, they represent 21,164,503 individuals. Compared to nationwide percentages, Florida has a higher proportion of Hispanics and North Carolina has a higher proportion of African Americans. When combined they form a reasonably ethnoracially diverse population---2% Asian, 16% Black, 11% Hispanic, 6% Other Race, 65% White.
+
+To perform the validation tests, I first geocoded each unique address in the North Carolina/Florida voter file. This allowed me to match individual observations to Census places and blocks, and ZIP codes. Then I applied the prediction algorithm described above using the `bper` package and calculated each individuals' predicted ethnorace. In order to compare my method against an existing benchmark, I also used the `wru` package [@imai2016] to calculate ethnorace predictions for the same individuals.[^10]
+
+[^10]: Unless otherwise noted, each prediction method is using the full set of available attributes for its predictions.
+
+```{r, fig.cap="Comparison to True Population Proportions in North Carolina and Florida"}
+load(here("data", "tests.rda"))
+
+true_props <-
+  tibble(
+    prop_api = 0.017,
+    prop_black = 0.163,
+    prop_hispanic = 0.111,
+    prop_other = 0.058,
+    prop_white = 0.651
+  ) %>% 
+  gather(value = true_props)
+
+wru_props <- tests[1, c("prop_api", "prop_black", "prop_hispanic", "prop_other", "prop_white")] %>% 
+  gather(value = "props") %>% 
+  mutate(Method = "wru")
+
+props <- tests[2, c("prop_api", "prop_black", "prop_hispanic", "prop_other", "prop_white")] %>% 
+  gather(value = "props") %>%
+  mutate(Method = "bper") %>% 
+  rbind(wru_props) %>% 
+  left_join(true_props) %>% 
+  mutate(diff = props - true_props,
+         key = case_when(key == "prop_api" ~ "Asian",
+                         key == "prop_black" ~ "Black",
+                         key == "prop_hispanic" ~ "Hispanic",
+                         key == "prop_other" ~ "Other",
+                         key == "prop_white" ~ "White"))
+
+
+ggplot(props, aes(x = key, y = diff * 100, fill = Method)) +
+  geom_bar(stat = "identity", position = position_dodge()) +
+  theme_minimal() +
+  labs(y = "% Point Difference from True Proportion", x = "") +
+  theme(text = element_text(family = "serif")) +
+  scale_fill_manual(values = c("darkcyan", "brown"))
+
+rm(true_props, wru_props)
+```
+
+Figure 1 displays how well each prediction method recovers the true ethnorace proportions in the North Carolina/Florida voter file. For each group, my method using the `bper` package estimates smaller differences in proportions (i.e. closer to horizontal line at zero in the figure). 
+
+
+\newpage
+
+```{r, fig.cap="Accuracy Scores by Input Data Availability"}
+acc_bper <- tests %>% 
+  filter(test_method == "bper") %>% 
+  select(test_type, accuracy)
+
+ggplot(acc_bper, aes(x = test_type, y = accuracy, group = 1)) +
+  geom_line(color = "darkcyan") +
+  geom_point(size = 3, color = "darkcyan") +
+  theme_minimal() +
+  ylim(0.75, 0.85) +
+  labs(y = "Accuracy Score") +
+  scale_x_discrete(name = "", limits = c("all", "all_np", "zip", "zip_np", "place", "place_np", "county", "county_np", "state", "state_np"),
+                   labels = c(
+                     "all" = "Block \n Multi-Unit \n Party ID \n First Name \n Last Name", 
+                     "place" = "Place \n Party ID \n First Name \n Last Name", 
+                     "county" = "County \n Party ID \n First Name \n Last Name", 
+                     "all_np" = "Block \n Multi-Unit \n First Name \n Last Name", 
+                     "place_np" = "Place \n First Name \n Last Name", 
+                     "county_np" = "County \n First Name \n Last Name",
+                     "zip" = "ZIP \n Party ID \n First Name \n Last Name",
+                     "zip_np" = "ZIP \n First Name \n Last Name",
+                     "state" = "State \n Party ID \n First Name \n Last Name",
+                     "state_np" = "State \n First Name \n Last Name"
+                   )) +
+  theme(text = element_text(family = "serif"), axis.text.x = element_text(size = 7))
+```
+\newpage
+
+```{r, fig.cap="Precision/Recall Scores by Ethnorace and Input Data"}
+metrics_bper <- tests %>% 
+  filter(test_method == "bper") %>% 
+  select(test_type, contains(c("prec", "rec"))) %>% 
+  pivot_longer(cols = contains(c("prec", "rec"))) %>% 
+  separate(name, c("Metric", "Race"), sep = "_") %>% 
+  filter(Race != "other") %>% 
+  mutate(Metric = case_when(Metric == "prec" ~ "Precision",
+                            Metric == "rec" ~ "Recall"),
+         Race = case_when(Race == "api" ~ "Asian",
+                          Race == "black" ~ "Black",
+                          Race == "hispanic" ~ "Hispanic",
+                          Race == "white" ~ "White"))
+
+ggplot(metrics_bper, aes(x = test_type, y = value, group = Metric)) +
+  geom_line(aes(color = Metric)) +
+  geom_point(aes(color = Metric), size = 1.5) +
+  theme_minimal() +
+  labs(x = "", y = "Score") +
+  scale_color_manual(values = c("gold3", "skyblue4")) +
+  scale_x_discrete(name = "", limits = c("all", "all_np", "zip", "zip_np", "place", "place_np", "county", "county_np", "state", "state_np"),
+                   labels = c(
+                     "all" = "Block", 
+                     "place" = "Place", 
+                     "county" = "County ", 
+                     "all_np" = "Block (np)", 
+                     "place_np" = "Place (np)", 
+                     "county_np" = "County (np)",
+                     "zip" = "ZIP",
+                     "zip_np" = "ZIP (np)",
+                     "state" = "State",
+                     "state_np" = "State (np)"
+                   )) +
+  facet_wrap(~ Race) +
+  theme(text = element_text(family = "serif"), axis.text.x = element_text(size = 7, angle = 60))
+```
+
+```{r}
+# metrics_wru <- tests %>% 
+#   filter(test_method == "wru") %>% 
+#   select(test_type, contains(c("prec", "rec"))) %>% 
+#   pivot_longer(cols = contains(c("prec", "rec"))) %>% 
+#   separate(name, c("Metric", "Race"), sep = "_") %>% 
+#   filter(Race != "other") %>% 
+#   mutate(Metric = case_when(Metric == "prec" ~ "Precision",
+#                             Metric == "rec" ~ "Recall"),
+#          Race = case_when(Race == "api" ~ "Asian",
+#                           Race == "black" ~ "Black",
+#                           Race == "hispanic" ~ "Hispanic",
+#                           Race == "white" ~ "White"))
+# 
+# ggplot(metrics_wru, aes(x = test_type, y = value, group = Metric)) +
+#   geom_line(aes(color = Metric)) +
+#   geom_point(aes(color = Metric), size = 1.5) +
+#   theme_minimal() +
+#   labs(x = "", y = "Score") +
+#   scale_color_manual(values = c("gold", "paleturquoise4")) +
+#   scale_x_discrete(name = "", limits = c("all", "all_np","place", "place_np", "county", "county_np"),
+#                    labels = c(
+#                      "all" = "Block", 
+#                      "place" = "Place", 
+#                      "county" = "County ", 
+#                      "all_np" = "Block (np)", 
+#                      "place_np" = "Place (np)", 
+#                      "county_np" = "County (np)",
+#                      "zip" = "ZIP",
+#                      "zip_np" = "ZIP (np)",
+#                      "state" = "State",
+#                      "state_np" = "State (np)"
+#                    )) +
+#   facet_wrap(~ Race) +
+#   theme(text = element_text(family = "serif"), axis.text.x = element_text(size = 7, angle = 60))
+```
+
+\newpage
+
+```{r, fig.cap="Accuracy Score Comparison to `wru`"}
+plot_tests <- tests %>% 
+  filter(!(test_type %in% c("zip", "zip_np", "state", "state_np")))
+
+accuracy <- plot_tests %>% 
+  select(test_method, test_type, accuracy) %>% 
+  group_by(test_type) %>% 
+  summarise(diff = last(accuracy) - first(accuracy), bper_val = last(accuracy))
+
+
+ggplot(accuracy, aes(x = test_type, y = diff)) +
+  geom_bar(stat = "identity", fill = "darkcyan") +
+  theme_minimal() + 
+  labs(y = "Difference in Accuracy", x = "") +
+  scale_x_discrete(name = "", limits = c("all", "all_np", "place", "place_np", "county", "county_np"),
+                   labels = c(
+                     "all" = "Block \n Multi-Unit \n Party ID \n First Name \n Last Name", 
+                     "place" = "Place \n Party ID \n First Name \n Last Name", 
+                     "county" = "County \n Party ID \n First Name \n Last Name", 
+                     "all_np" = "Block \n Multi-Unit \n First Name \n Last Name", 
+                     "place_np" = "Place \n First Name \n Last Name", 
+                     "county_np" = "County \n First Name \n Last Name")) +
+  theme(text = element_text(family = "serif"))
+```
+ \newpage
+ 
+```{r, fig.cap="Precision and Recall Score Comparison to `wru`: Asian"}
+api <- plot_tests %>% 
+  select(test_method, test_type, prec_api, rec_api) %>% 
+  group_by(test_type) %>% 
+  summarise(prec_diff = last(prec_api) - first(prec_api), prec_bper = last(prec_api),
+            rec_diff = last(rec_api) - first(rec_api), rec_bper = last(rec_api)) %>% 
+  ungroup() %>% 
+  mutate(prec_color = if_else(prec_diff < 0, "brown", "darkcyan"),
+         rec_color = if_else(rec_diff < 0, "brown", "darkcyan"))
+
+prec_api <-
+  ggplot(api, aes(x = test_type, y = prec_diff, fill = prec_color)) +
+  geom_bar(stat = "identity") +
+  scale_fill_identity(guide = F) +
+  theme_minimal() + 
+  labs(y = "Difference in Precision", x = "", title = "") +
+  scale_x_discrete(name = "", limits = c("all", "all_np", "place", "place_np", "county", "county_np"),
+                   labels = c(
+                     "all" = "", 
+                     "place" = "", 
+                     "county" = "", 
+                     "all_np" = "", 
+                     "place_np" = "", 
+                     "county_np" = "")
+                   ) +
+  theme(text = element_text(family = "serif"))
+
+rec_api <-
+ ggplot(api, aes(x = test_type, y = rec_diff, fill = rec_color)) +
+  geom_bar(stat = "identity") +
+  scale_fill_identity(guide = F) +
+  theme_minimal() + 
+  labs(y = "Difference in Recall", x = "") +
+  scale_x_discrete(name = "", limits = c("all", "all_np", "place", "place_np", "county", "county_np"),
+                   labels = c(
+                     "all" = "Block \n Multi-Unit \n Party ID \n First Name \n Last Name", 
+                     "place" = "Place \n Party ID \n First Name \n Last Name", 
+                     "county" = "County \n Party ID \n First Name \n Last Name", 
+                     "all_np" = "Block \n Multi-Unit \n First Name \n Last Name", 
+                     "place_np" = "Place \n First Name \n Last Name", 
+                     "county_np" = "County \n First Name \n Last Name")) +
+  theme(text = element_text(family = "serif"))
+
+grid.arrange(prec_api, rec_api, nrow = 2)
+```
+
+
+
+\newpage
+
+```{r, fig.cap="Precision and Recall Score Comparison to `wru`: Black"}
+black <- plot_tests %>% 
+  select(test_method, test_type, prec_black, rec_black) %>% 
+  group_by(test_type) %>% 
+  summarise(prec_diff = last(prec_black) - first(prec_black), prec_bper = last(prec_black),
+            rec_diff = last(rec_black) - first(rec_black), rec_bper = last(rec_black)) %>% 
+  ungroup() %>% 
+  mutate(prec_color = if_else(prec_diff < 0, "brown", "darkcyan"),
+         rec_color = if_else(rec_diff < 0, "brown", "darkcyan"))
+
+prec_black <-
+  ggplot(black, aes(x = test_type, y = prec_diff, fill = prec_color)) +
+  geom_bar(stat = "identity") +
+  scale_fill_identity(guide = F) +
+  theme_minimal() + 
+  ylim(0, 0.35) +
+  labs(y = "Difference in Precision", x = "", title = "") +
+  scale_x_discrete(name = "", limits = c("all", "all_np", "place", "place_np", "county", "county_np"),
+                   labels = c(
+                     "all" = "", 
+                     "place" = "", 
+                     "county" = "", 
+                     "all_np" = "", 
+                     "place_np" = "", 
+                     "county_np" = "")
+                   ) +
+  theme(text = element_text(family = "serif"))
+
+rec_black <-
+ ggplot(black, aes(x = test_type, y = rec_diff, fill = rec_color)) +
+  geom_bar(stat = "identity") +
+  scale_fill_identity(guide = F) +
+  theme_minimal() + 
+  ylim(-0.3, 0) +
+  labs(y = "Difference in Recall", x = "") +
+  scale_x_discrete(name = "", limits = c("all", "all_np", "place", "place_np", "county", "county_np"),
+                   labels = c(
+                     "all" = "Block \n Multi-Unit \n Party ID \n First Name \n Last Name", 
+                     "place" = "Place \n Party ID \n First Name \n Last Name", 
+                     "county" = "County \n Party ID \n First Name \n Last Name", 
+                     "all_np" = "Block \n Multi-Unit \n First Name \n Last Name", 
+                     "place_np" = "Place \n First Name \n Last Name", 
+                     "county_np" = "County \n First Name \n Last Name")) +
+  theme(text = element_text(family = "serif"))
+
+grid.arrange(prec_black, rec_black, nrow = 2)
+```
+
+\newpage
+
+```{r, fig.cap="Precision and Recall Score Comparison to `wru`: Hispanic"}
+hispanic <- plot_tests %>% 
+  select(test_method, test_type, prec_hispanic, rec_hispanic) %>% 
+  group_by(test_type) %>% 
+  summarise(prec_diff = last(prec_hispanic) - first(prec_hispanic), prec_bper = last(prec_hispanic),
+            rec_diff = last(rec_hispanic) - first(rec_hispanic), rec_bper = last(rec_hispanic)) %>% 
+  ungroup() %>% 
+  mutate(prec_color = if_else(prec_diff < 0, "brown", "darkcyan"),
+         rec_color = if_else(rec_diff < 0, "brown", "darkcyan"))
+
+prec_hispanic <-
+  ggplot(hispanic, aes(x = test_type, y = prec_diff, fill = prec_color)) +
+  geom_bar(stat = "identity") +
+  scale_fill_identity(guide = F) +
+  theme_minimal() + 
+  labs(y = "Difference in Precision", x = "", title = "") +
+  scale_x_discrete(name = "", limits = c("all", "all_np", "place", "place_np", "county", "county_np"),
+                   labels = c(
+                     "all" = "", 
+                     "place" = "", 
+                     "county" = "", 
+                     "all_np" = "", 
+                     "place_np" = "", 
+                     "county_np" = "")
+                   ) +
+  theme(text = element_text(family = "serif"))
+
+rec_hispanic <-
+ ggplot(hispanic, aes(x = test_type, y = rec_diff, fill = rec_color)) +
+  geom_bar(stat = "identity") +
+  scale_fill_identity(guide = F) +
+  theme_minimal() + 
+  labs(y = "Difference in Recall", x = "") +
+  scale_x_discrete(name = "", limits = c("all", "all_np", "place", "place_np", "county", "county_np"),
+                   labels = c(
+                     "all" = "Block \n Multi-Unit \n Party ID \n First Name \n Last Name", 
+                     "place" = "Place \n Party ID \n First Name \n Last Name", 
+                     "county" = "County \n Party ID \n First Name \n Last Name", 
+                     "all_np" = "Block \n Multi-Unit \n First Name \n Last Name", 
+                     "place_np" = "Place \n First Name \n Last Name", 
+                     "county_np" = "County \n First Name \n Last Name")) +
+  theme(text = element_text(family = "serif"))
+
+grid.arrange(prec_hispanic, rec_hispanic, nrow = 2)
+```
+
+\newpage
+
+```{r, fig.cap="Precision and Recall Score Comparison to `wru`: White"}
+white <- plot_tests %>% 
+  select(test_method, test_type, prec_white, rec_white) %>% 
+  group_by(test_type) %>% 
+  summarise(prec_diff = last(prec_white) - first(prec_white), prec_bper = last(prec_white),
+            rec_diff = last(rec_white) - first(rec_white), rec_bper = last(rec_white)) %>% 
+  ungroup() %>% 
+  mutate(prec_color = if_else(prec_diff < 0, "brown", "darkcyan"),
+         rec_color = if_else(rec_diff < 0, "brown", "darkcyan"))
+
+prec_white <-
+  ggplot(white, aes(x = test_type, y = prec_diff, fill = prec_color)) +
+  geom_bar(stat = "identity") +
+  scale_fill_identity(guide = F) +
+  theme_minimal() + 
+  labs(y = "Difference in Precision", x = "", title = "") +
+  scale_x_discrete(name = "", limits = c("all", "all_np", "place", "place_np", "county", "county_np"),
+                   labels = c(
+                     "all" = "", 
+                     "place" = "", 
+                     "county" = "", 
+                     "all_np" = "", 
+                     "place_np" = "", 
+                     "county_np" = "")
+                   ) +
+  theme(text = element_text(family = "serif"))
+
+rec_white <-
+ ggplot(white, aes(x = test_type, y = rec_diff, fill = rec_color)) +
+  geom_bar(stat = "identity") +
+  scale_fill_identity(guide = F) +
+  theme_minimal() + 
+  labs(y = "Difference in Recall", x = "") +
+  scale_x_discrete(name = "", limits = c("all", "all_np", "place", "place_np", "county", "county_np"),
+                   labels = c(
+                     "all" = "Block \n Multi-Unit \n Party ID \n First Name \n Last Name", 
+                     "place" = "Place \n Party ID \n First Name \n Last Name", 
+                     "county" = "County \n Party ID \n First Name \n Last Name", 
+                     "all_np" = "Block \n Multi-Unit \n First Name \n Last Name", 
+                     "place_np" = "Place \n First Name \n Last Name", 
+                     "county_np" = "County \n First Name \n Last Name")) +
+  theme(text = element_text(family = "serif"))
+
+grid.arrange(prec_white, rec_white, nrow = 2)
+```
+
+\newpage
+
+
+
 
 
 
 
 # Conclusion
 
-cite list:
+<!-- cite list: -->
 
-methods:
+<!-- methods: -->
 
--   [@voicu2018]
+<!-- -   [@voicu2018] -->
 
--   [@tzioumis2018]
+<!-- -   [@tzioumis2018] -->
 
--   [@shah2017]
+<!-- -   [@shah2017] -->
 
--   [@imai2016]
+<!-- -   [@imai2016] -->
 
--   [@elliott2009]
+<!-- -   [@elliott2009] -->
 
--   [@crabtree2018] (independence assumption)
+<!-- -   [@crabtree2018] (independence assumption) -->
 
--   [@lauderdale2000] (asian surnames)
+<!-- -   [@lauderdale2000] (asian surnames) -->
 
-naive bayes:
+<!-- naive bayes: -->
 
--   [@rish2001]
+<!-- -   [@rish2001] -->
 
--   [@lewis1998]
+<!-- -   [@lewis1998] -->
 
--   [@domingos1997]
+<!-- -   [@domingos1997] -->
 
-applications:
+<!-- applications: -->
 
--   [@velez2019] (use NC)
+<!-- -   [@velez2019] (use NC) -->
 
--   [@studdert2020] (medical study)
+<!-- -   [@studdert2020] (medical study) -->
 
--   [@kuk2020] (aggregate)
+<!-- -   [@kuk2020] (aggregate) -->
 
--   [@cascio2012] (aggregate)
+<!-- -   [@cascio2012] (aggregate) -->
 
--   [@cantoni2020] (RDD)
+<!-- -   [@cantoni2020] (RDD) -->
 
--   [@hersh2016] (catalist)
+<!-- -   [@hersh2016] (catalist) -->
 
--   [@ghitza] (catalist)
+<!-- -   [@ghitza] (catalist) -->
 
--   [@grumbach2020]
+<!-- -   [@grumbach2020] -->
 
--   [@grumbach2020a]
+<!-- -   [@grumbach2020a] -->
 
--   [@fraga2018] (turnout)
+<!-- -   [@fraga2018] (turnout) -->
 
--   [@enos2019] (protests and voting)
+<!-- -   [@enos2019] (protests and voting) -->
 
--   [@enos2016] (racial threat)
+<!-- -   [@enos2016] (racial threat) -->
 
-race:
+<!-- race: -->
 
--   [@omi2014]
+<!-- -   [@omi2014] -->
+
+\newpage
 
 ## References
