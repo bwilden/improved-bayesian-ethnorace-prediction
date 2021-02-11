@@ -170,13 +170,11 @@ ggplot(props, aes(x = key, y = diff * 100, fill = Method)) +
   theme(text = element_text(family = "serif")) +
   scale_fill_manual(values = c("darkcyan", "brown"))
 
-rm(true_props, wru_props)
 ```
 
-Figure 1 displays how well each prediction method recovers the true ethnorace proportions in the North Carolina/Florida voter file. For each group, my method using the `bper` package estimates smaller differences in proportions (i.e. closer to horizontal line at zero in the figure). 
+Figure 1 displays how well each prediction method recovers the true ethnorace proportions in the North Carolina/Florida voter file. For each group, my method using the `bper` package estimates smaller differences in proportions (i.e. closer to horizontal line at zero in the figure). In the case of African Americans this difference is cut in half. Both prediction methods share a pattern in overestimating certain group and underestimating others. While it is reassuring to be able to recover close to the true population proportions for each group, this is a poor metric for assessing predictive performance. Most researchers probably care more about individual-level predictions rather than population-level predictions.
 
-
-\newpage
+The most straightforward metric for assessing individual-level predictive performance is the Accuracy score, or Overall Error Rate. This number is the proportion of correctly classified individuals in the sample. I ran the model separately for different combinations of input variables to mimic data availability constraints in real-world applications, and then calculated the Accuracy score for each. Figure 2 displays a summary of the results of these different models. 
 
 ```{r, fig.cap="Accuracy Scores by Input Data Availability"}
 acc_bper <- tests %>% 
@@ -204,9 +202,13 @@ ggplot(acc_bper, aes(x = test_type, y = accuracy, group = 1)) +
                    )) +
   theme(text = element_text(family = "serif"), axis.text.x = element_text(size = 7))
 ```
-\newpage
 
-```{r, fig.cap="Precision/Recall Scores by Ethnorace and Input Data"}
+As expected, the model with the greatest number of input data sources, and at the most precise geographic level, on the far left of the figure performs the best in terms of overall accuracy. Using Census blocks, multi-unit address, party ID, first names, and last names, this model correctly identifies the ethnorace for `r subset(tests, select = "accuracy", test_method == "bper" & test_type == "all") * 100`% of individuals in the sample. The downward trend in model accuracy seen in the figure corresponds in expanding the size of the geolocation variable. Moving from blocks to ZIP codes, to places, to counties, and to states all decrease the overall predictive performance. I include the input for multi-unit occupancy only for the Census block models because I believe this reflects the practical contexts where `bper` might be used. If a researcher has access to individual-level addresses, they should be able to using geocoding to find the matching Census blocks and should be able to parse the unit type. But researchers relying on more aggregate geographies likely do not have access to individual addresses, and hence the unit types, for their sample.[^11] In Figure 2 I also pair each geolocation variable with a model missing the party ID input. The blow to predictive performance across all geographies appears roughly uniform with the removal of party ID.
+
+[^11]: In the event that data is available, adding multi-unit occupancy inputs to aggregate geographies, such as ZIP codes, places, counties, or states *greatly* enhances the predictive accuracy of the model.
+
+
+```{r, fig.cap="Precision/Recall Scores by Ethnorace and Input Data: `bper`"}
 metrics_bper <- tests %>% 
   filter(test_method == "bper") %>% 
   select(test_type, contains(c("prec", "rec"))) %>% 
@@ -280,7 +282,6 @@ ggplot(metrics_bper, aes(x = test_type, y = value, group = Metric)) +
 #   theme(text = element_text(family = "serif"), axis.text.x = element_text(size = 7, angle = 60))
 ```
 
-\newpage
 
 ```{r, fig.cap="Accuracy Score Comparison to `wru`"}
 plot_tests <- tests %>% 
@@ -306,7 +307,7 @@ ggplot(accuracy, aes(x = test_type, y = diff)) +
                      "county_np" = "County \n First Name \n Last Name")) +
   theme(text = element_text(family = "serif"))
 ```
- \newpage
+
  
 ```{r, fig.cap="Precision and Recall Score Comparison to `wru`: Asian"}
 api <- plot_tests %>% 
@@ -356,7 +357,6 @@ grid.arrange(prec_api, rec_api, nrow = 2)
 
 
 
-\newpage
 
 ```{r, fig.cap="Precision and Recall Score Comparison to `wru`: Black"}
 black <- plot_tests %>% 
@@ -406,7 +406,7 @@ rec_black <-
 grid.arrange(prec_black, rec_black, nrow = 2)
 ```
 
-\newpage
+
 
 ```{r, fig.cap="Precision and Recall Score Comparison to `wru`: Hispanic"}
 hispanic <- plot_tests %>% 
@@ -454,7 +454,7 @@ rec_hispanic <-
 grid.arrange(prec_hispanic, rec_hispanic, nrow = 2)
 ```
 
-\newpage
+
 
 ```{r, fig.cap="Precision and Recall Score Comparison to `wru`: White"}
 white <- plot_tests %>% 
