@@ -36,9 +36,10 @@ nc_fl_wru %>%
 source(here("R", "funcs", "classify_and_report.R"))
 
 # Set up test data
-sample_vec <- sample(1:nrow(nc_fl), 5e6, replace = FALSE)
-nc_fl_tests <- nc_fl[sample_vec, ] %>% 
-  select(-c(birth_year, female))
+sample_vec <- sample(1:nrow(nc_fl), 2e6, replace = FALSE)
+nc_fl_tests <- nc_fl[sample_vec, ] 
+  # select(-c(birth_year, female))
+
 nc_fl_wru_tests <- nc_fl_wru[sample_vec, ]
 
 # Test results holder
@@ -46,76 +47,76 @@ tests <- data.frame()
 
 # Full comparisons
 wru_all <- nc_fl_wru_tests %>% 
-  classify_and_report(wru = T, wru_geo = "block", test_name = "wru_all")
+  classify_and_report(wru = T, wru_geo = "block", test_type = "all")
 bper_all <- nc_fl_tests %>% 
-  classify_and_report(test_name = "bper_all")
+  classify_and_report(test_type = "all")
 tests <- rbind(tests, wru_all, bper_all)
 
 # Place
 wru_place <- nc_fl_wru_tests %>% 
   filter(!is.na(place)) %>% 
-  classify_and_report(wru = T, wru_geo = "place", test_name = "wru_place")
+  classify_and_report(wru = T, wru_geo = "place", test_type = "place")
 bper_place <- nc_fl_tests %>% 
   select(-c(block, apartment)) %>% 
   filter(!is.na(place)) %>% 
-  classify_and_report(test_name = "bper_place")
+  classify_and_report(test_type = "place")
 tests <- rbind(tests, wru_place, bper_place)
 
 # Zip
 bper_zip <- nc_fl_tests %>% 
   select(-c(block, place, apartment)) %>% 
-  classify_and_report(test_name = "bper_zip")
+  classify_and_report(test_type = "zip")
 tests <- rbind(tests, bper_zip)
 
 # County
 wru_county <- nc_fl_wru_tests %>% 
-  classify_and_report(wru = T, wru_geo = "county", test_name = "wru_county")
+  classify_and_report(wru = T, wru_geo = "county", test_type = "county")
 bper_county <- nc_fl_tests %>% 
   select(-c(block, place, zip, apartment)) %>% 
-  classify_and_report(test_name = "bper_county")
+  classify_and_report(test_type = "county")
 tests <- rbind(tests, wru_county, bper_county)
 
 # State
 bper_state <- nc_fl_tests %>% 
   select(-c(block, place, zip, county, apartment)) %>% 
-  classify_and_report(test_name = "bper_state")
+  classify_and_report(test_type = "state")
 tests <- rbind(tests, bper_state)
 
 # No Party
 wru_all_np <- nc_fl_wru_tests %>% 
   select(-PID) %>% 
-  classify_and_report(wru = T, wru_geo = "block", wru_party = F, test_name = "wru_all_np")
+  classify_and_report(wru = T, wru_geo = "block", wru_party = F, test_type = "all_np")
 bper_all_np <- nc_fl_tests %>% 
   select(-party) %>% 
-  classify_and_report(test_name = "bper_all_np")
+  classify_and_report(test_type = "all_np")
 tests <- rbind(tests, wru_all_np, bper_all_np)
 
 wru_place_np <- nc_fl_wru_tests %>% 
   select(-PID) %>%
   filter(!is.na(place)) %>% 
-  classify_and_report(wru = T, wru_geo = "place", wru_party = F, test_name = "wru_place_np")
+  classify_and_report(wru = T, wru_geo = "place", wru_party = F, test_type = "place_np")
 bper_place_np <- nc_fl_tests %>% 
   select(-c(party, block, apartment)) %>% 
   filter(!is.na(place)) %>% 
-  classify_and_report(test_name = "bper_place_np")
+  classify_and_report(test_type = "place_np")
 tests <- rbind(tests, wru_place_np, bper_place_np)
 
 bper_zip_np <- nc_fl_tests %>% 
   select(-c(party, block, place, apartment)) %>% 
-  classify_and_report(test_name = "bper_zip_np")
+  classify_and_report(test_type = "zip_np")
 tests <- rbind(tests, bper_zip_np)
 
 wru_county_np <- nc_fl_wru_tests %>% 
   select(-PID) %>% 
-  classify_and_report(wru = T, wru_geo = "county", wru_party = F, test_name = "wru_county_np")
+  classify_and_report(wru = T, wru_geo = "county", wru_party = F, test_type = "county_np")
 bper_county_np <- nc_fl_tests %>% 
   select(-c(party, block, place, zip, apartment)) %>% 
-  classify_and_report(test_name = "bper_county_np")
+  classify_and_report(test_type = "county_np")
 tests <- rbind(tests, wru_county_np, bper_county_np)
 
 bper_state_np <- nc_fl_tests %>% 
   select(-c(party, block, place, zip, county, apartment)) %>% 
-  classify_and_report(test_name = "bper_state_np")
+  classify_and_report(test_type = "state_np")
 tests <- rbind(tests, bper_state_np)
 
 save(tests, file = here("data", "tests.rda"))

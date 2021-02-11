@@ -117,7 +117,7 @@ predict_race_wru <- function(df, wru_geo, wru_party) {
   
 }
 
-classify_and_report <- function(df, wru = F, wru_geo, wru_party = TRUE, test_name) {
+classify_and_report <- function(df, wru = F, wru_geo, wru_party = TRUE, test_type) {
   if (wru == TRUE) {
     df <- predict_race_wru(df, wru_geo, wru_party) %>%
       mutate(race = if_else(race == "aian", "other", race))
@@ -174,10 +174,16 @@ classify_and_report <- function(df, wru = F, wru_geo, wru_party = TRUE, test_nam
   rec_other <- conf_matrix$byClass[4, "Recall"]
   rec_white <- conf_matrix$byClass[5, "Recall"]
   
+  if (wru == TRUE) {
+    test_method <- "wru"
+  } else {
+    test_method <- "bper"
+  }
   
   return(
     tibble(
-      test_name = test_name,
+      test_method = test_method,
+      test_type = test_type,
       accuracy = accuracy,
       prec_api = prec_api,
       prec_black = prec_black,
