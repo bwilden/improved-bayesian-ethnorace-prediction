@@ -203,7 +203,7 @@ ggplot(acc_bper, aes(x = test_type, y = accuracy, group = 1)) +
   theme(text = element_text(family = "serif"), axis.text.x = element_text(size = 7))
 ```
 
-As expected, the model with the greatest number of input data sources, and at the most precise geographic level, on the far left of the figure performs the best in terms of overall accuracy. Using Census blocks, multi-unit address, party ID, first names, and last names, this model correctly identifies the ethnorace of `r round(subset(tests, select = "accuracy", test_method == "bper" & test_type == "all"), 3) * 100`% of individuals in the sample. The downward trend in model accuracy seen in the figure corresponds to expanding the size of the geolocation variable. Moving from blocks to ZIP codes, to places, to counties, and to states all decrease the overall predictive performance. I include the input for multi-unit occupancy only for the Census block models because I believe this reflects the practical contexts where `bper` might be used. If a researcher has access to individual-level addresses, they should be able to using geocoding to find the matching Census blocks and should be able to parse the unit type. But researchers relying on more aggregate geographies likely do not have access to individual addresses, and hence the unit types, for their sample.[^11] In Figure 2 I also pair each geolocation variable with a model missing the party ID input. The blow to predictive performance across all geographies appears roughly uniform with the removal of party ID.
+As expected, the model with the greatest number of input data sources, and at the most precise geographic level, on the far left of the figure performs the best in terms of overall Accuracy. Using Census blocks, multi-unit address, party ID, first names, and last names, this model correctly identifies the ethnorace of `r round(subset(tests, select = "accuracy", test_method == "bper" & test_type == "all"), 3) * 100`% of individuals in the sample. The downward trend in model accuracy seen in the figure corresponds to expanding the size of the geolocation variable. Moving from blocks to ZIP codes, to places, to counties, and to states all decrease the overall predictive performance. I include the input for multi-unit occupancy only for the Census block models because I believe this reflects the practical contexts where `bper` might be used. If a researcher has access to individual-level addresses, they should be able to geocode these to find the matching Census blocks and should also be able to parse the unit type. But researchers relying on more aggregate geographies likely do not have access to individual addresses, and hence the unit types, for their sample.[^11] In Figure 2 I also pair each geolocation variable with a model missing the party ID input. The losses to predictive performance across all geographies appears roughly uniform with the removal of party ID.
 
 [^11]: In the event that data is available, adding multi-unit occupancy inputs to aggregate geographies, such as ZIP codes, places, counties, or states *greatly* enhances the predictive accuracy of the model.
 
@@ -224,8 +224,8 @@ metrics_bper <- tests %>%
                           Race == "white" ~ "White"))
 
 ggplot(metrics_bper, aes(x = test_type, y = value, group = Metric)) +
-  geom_line(aes(color = Metric)) +
-  geom_point(aes(color = Metric), size = 1.5) +
+  geom_line(aes(color = Metric), size = 0.3) +
+  geom_point(aes(color = Metric), size = 2) +
   theme_minimal() +
   labs(x = "", y = "Score") +
   scale_color_manual(values = c("gold3", "skyblue4")) +
@@ -245,9 +245,16 @@ ggplot(metrics_bper, aes(x = test_type, y = value, group = Metric)) +
   facet_wrap(~ Race) +
   theme(text = element_text(family = "serif"), axis.text.x = element_text(size = 7, angle = 60))
 ```
-Figure 3 displays the Precision and Recall scores broken down by race for the same models used in Figure 2. Precision is the percentage of individuals who  of correctly classified individuals in a single class. 
 
+Precision/Recall. Precision is the percentage of correctly classified individuals among all individuals predicted to belong to a specific ethnorace. It answers the question of how likely an individual's predicted ethnorace in our sample matches their true ethnorace. Recall, also known as Sensitivity or the True Positive Rate, is the percentage of all individuals who belong to a specific ethnorace which the model correctly classifies. 
 
+I believe these are the two best metrics with which to evaluate the predictive performance of the algorithm. Precision and Recall reflect substantively important concerns for its real-world applications, and the inherent trade-offs between optimizing for either metric provides a balanced assessment of the results. On the one hand, Precision rewards very conservative classification procedures. We could, for example, only classify individuals as White if their posterior probability of being White was greater than 99%. This would ensure a very high Precision score for Whites because we are only capturing the low-hanging fruit. A conservative classification procedure like this, however, would likely result in extremely low Recall for Whites. If we only capture the low-hanging fruit, a greater share of White individuals will be mis-classified. Likewise, optimizing the algorithm for perfect Recall for Whites is trivial. By classifying every individual as White, we ensure 100% of Whites are correctly classified. Of course this procedure would result in extremely low Precision for Whites because so many non-Whites would be classified as White. Achieving both high Precision and high Recall, therefore, is a difficult task.
+
+Figure 3 displays the Precision and Recall scores broken down by ethnorace for the same models used in Figure 2.[^12] For both Whites and Hispanics, Precision and Recall remain high across all models. Using the most input data available (the models on the far left of the figure), White Precision and Recall are `r round(subset(tests, select = "prec_white", test_method == "bper" & test_type == "all"), 3)` and `r round(subset(tests, select = "rec_white", test_method == "bper" & test_type == "all"), 3)`, respectively. And Hispanic Precision and Recall are `r round(subset(tests, select = "prec_hispanic", test_method == "bper" & test_type == "all"), 3)` and `r round(subset(tests, select = "rec_hispanic", test_method == "bper" & test_type == "all"), 3)`, respectively. These metrics are uniformly lower for Asians---likely reflecting the relative rarity of Asian individuals in the sample. When using Census blocks as the unit of geography, predictions for African Americans are strong (Precision: `r round(subset(tests, select = "prec_black", test_method == "bper" & test_type == "all"), 3)`, Recall: `r round(subset(tests, select = "rec_black", test_method == "bper" & test_type == "all"), 3)`). But predictive performance falls steeply with broader geolocations. At the state level, without party ID, Black Precision is `r round(subset(tests, select = "prec_black", test_method == "bper" & test_type == "state_np"), 3)` and Recall is `r round(subset(tests, select = "rec_black", test_method == "bper" & test_type == "state_np"), 3)`. This difference in predictive performance between geographies suggests patterns of racial segregation in at least the North Carolina and Florida sample. 
+
+[^12]: The model names are abbreviated by the level of geography, and all use first name and last name inputs. Models with *(np)* do not use the party ID inputs.
+
+[*insert paragraph summing up results*]
 
 ```{r}
 # metrics_wru <- tests %>% 
@@ -285,8 +292,6 @@ Figure 3 displays the Precision and Recall scores broken down by race for the sa
 #   facet_wrap(~ Race) +
 #   theme(text = element_text(family = "serif"), axis.text.x = element_text(size = 7, angle = 60))
 ```
-
-
 ```{r, fig.cap="Accuracy Score Comparison to `wru`"}
 plot_tests <- tests %>% 
   filter(!(test_type %in% c("zip", "zip_np", "state", "state_np")))
@@ -312,6 +317,11 @@ ggplot(accuracy, aes(x = test_type, y = diff)) +
   theme(text = element_text(family = "serif"))
 ```
 
+The classification metrics detailed above provide some information about the predictive shortcomings of my method. These limitations notwithstanding, however, the ethnorace predictions made by `bper` are nearly uniformly better than those from `wru`. Figure 4 displays the difference in Accuracy between `bper` and `wru` using the same input data discussed previously.[^13] The baseline of zero in the figure represents the Accuracy scores from each model using `wru`, and the height of the bars display the change in Accuracy using `bper`. Across all model types, `bper` scores between 1.5 and 3.5 percentage points higher on this metric. Regardless of input data, `bper` classifies a higher proportion of individuals correctly in the North Carolina/Florida voter file.
+
+[^13]: The `wru` package does not provide ZIP code or state level predictions so those models are excluded from the comparison.
+
+Figures 5 through 8 show the same comparisons between `wru` and `bper` for Precision and Recall across different ethnoraces. For Asians in Figure 5, the comparisons shows absolute gains for `bper` in both metrics for most model types. When using place-level geography, and county-level without party ID, there is some loss to Recall. But the large gains in Precision should outweigh these concerns. The comparison among predictions for Black individuals in Figure 6 are striking. Despite slightly lower Recall scores across all model types, my method shows dramatic gains in Precision at the broader geographic levels. Without party ID, `bper` improves upon `wru` by at least 30 percentage points in Precision using place or county geolocations.
  
 ```{r, fig.cap="Precision and Recall Score Comparison to `wru`: Asian"}
 api <- plot_tests %>% 
