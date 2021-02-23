@@ -186,8 +186,8 @@ ggplot(acc_bper, aes(x = test_type, y = accuracy, group = 1)) +
   theme_minimal() +
   ylim(0.75, 0.85) +
   labs(y = "Accuracy Score") +
-  scale_x_discrete(name = "Model Inputs", limits = c("all", "all_np", "zip", "zip_np", "place", "place_np", "county", "county_np", "state", "state_np"),
-                   labels = c(
+  scale_x_discrete(name = "Model Inputs", limits = rev(c("all", "all_np", "zip", "zip_np", "place", "place_np", "county", "county_np", "state", "state_np")),
+                   labels = rev(c(
                      "all" = "Block \n Multi-Unit \n Party ID \n First Name \n Last Name", 
                      "place" = "Place \n Party ID \n First Name \n Last Name", 
                      "county" = "County \n Party ID \n First Name \n Last Name", 
@@ -198,11 +198,11 @@ ggplot(acc_bper, aes(x = test_type, y = accuracy, group = 1)) +
                      "zip_np" = "ZIP \n First Name \n Last Name",
                      "state" = "State \n Party ID \n First Name \n Last Name",
                      "state_np" = "State \n First Name \n Last Name"
-                   )) +
+                   ))) +
   theme(text = element_text(family = "serif"), axis.text.x = element_text(size = 7))
 ```
 
-As expected, the model with the greatest number of input data sources, and at the most precise geographic level, on the far left of the figure performs the best in terms of overall Accuracy. Using Census blocks, multi-unit address, party ID, first names, and last names, this model correctly identifies the ethnorace of `r round(subset(tests, select = "accuracy", test_method == "bper" & test_type == "all"), 3) * 100`% of individuals in the sample. The downward trend in model accuracy seen in the figure corresponds to expanding the size of the geolocation variable used. Moving from blocks to ZIP codes, then to places, then to counties, and finally to states all decrease the overall predictive performance in terms of overall Accuracy. I include the input for multi-unit occupancy only for the Census block models because I believe this reflects the practical contexts where `bper` might be used. If a researcher has access to individual-level addresses, they should be able to geocode these to find the matching Census blocks and should also be able to parse the residency type (multi-unit or stand-alone). But researchers relying on more aggregate geographies likely do not have access to individual addresses, and hence the residency characteristics, for their sample.[^10] In Figure 2 I pair each geolocation variable with a model missing the party ID input. The losses to predictive performance across all geographies appears roughly uniform with the removal of party ID.
+As expected, the model with the greatest number of input data sources, and at the most precise geographic level, on the far right of the figure performs the best in terms of overall Accuracy. Using Census blocks, multi-unit address, party ID, first names, and last names, this model correctly identifies the ethnorace of `r round(subset(tests, select = "accuracy", test_method == "bper" & test_type == "all"), 3) * 100`% of individuals in the sample. The downward trend in model accuracy seen in the figure corresponds to expanding the size of the geolocation variable used. Moving from blocks to ZIP codes, then to places, then to counties, and finally to states all decrease the overall predictive performance in terms of overall Accuracy. I include the input for multi-unit occupancy only for the Census block models because I believe this reflects the practical contexts where `bper` might be used. If a researcher has access to individual-level addresses, they should be able to geocode these to find the matching Census blocks and should also be able to parse the residency type (multi-unit or stand-alone). But researchers relying on more aggregate geographies likely do not have access to individual addresses, and hence the residency characteristics, for their sample.[^10] In Figure 2 I pair each geolocation variable with a model missing the party ID input. The losses to predictive performance across all geographies appears roughly uniform with the removal of party ID.
 
 [^10]: In the event that data is available, adding multi-unit occupancy inputs to aggregate geographies, such as ZIP codes, places, counties, or states *greatly* enhances the predictive accuracy of the model.
 
@@ -232,8 +232,8 @@ ggplot(metrics_bper, aes(x = test_type, y = value, group = Metric)) +
   theme_minimal() +
   labs(x = "", y = "Score") +
   scale_color_manual(values = c("gold3", "skyblue4")) +
-  scale_x_discrete(name = "Model Inputs", limits = c("all", "all_np", "zip", "zip_np", "place", "place_np", "county", "county_np", "state", "state_np"),
-                   labels = c(
+  scale_x_discrete(name = "Model Inputs", limits = rev(c("all", "all_np", "zip", "zip_np", "place", "place_np", "county", "county_np", "state", "state_np")),
+                   labels = rev(c(
                      "all" = "Block", 
                      "place" = "Place", 
                      "county" = "County ", 
@@ -244,12 +244,12 @@ ggplot(metrics_bper, aes(x = test_type, y = value, group = Metric)) +
                      "zip_np" = "ZIP (np)",
                      "state" = "State",
                      "state_np" = "State (np)"
-                   )) +
+                   ))) +
   facet_wrap(~ Race) +
   theme(text = element_text(family = "serif"), axis.text.x = element_text(size = 7, angle = 60))
 ```
 
-Figure 3 displays the Precision and Recall scores broken down by ethnorace for the same models used in Figure 2.[^11] For both Whites and Hispanics, Precision and Recall remain high across all models. Using the most input data available (the models on the far left of the figure), White Precision and Recall are `r round(subset(tests, select = "prec_white", test_method == "bper" & test_type == "all"), 3)` and `r round(subset(tests, select = "rec_white", test_method == "bper" & test_type == "all"), 3)`, respectively. Hispanic Precision and Recall in this model are `r round(subset(tests, select = "prec_hispanic", test_method == "bper" & test_type == "all"), 3)` and `r round(subset(tests, select = "rec_hispanic", test_method == "bper" & test_type == "all"), 3)`, respectively. These metrics are uniformly lower for Asians---likely reflecting the relative rarity of Asian individuals in the sample. When using Census blocks as the unit of geography, predictions for African Americans are strong (Precision: `r round(subset(tests, select = "prec_black", test_method == "bper" & test_type == "all"), 3)`, Recall: `r round(subset(tests, select = "rec_black", test_method == "bper" & test_type == "all"), 3)`). But predictive performance falls with broader geolocations. At the state level, without party ID, Black Precision is `r round(subset(tests, select = "prec_black", test_method == "bper" & test_type == "state_np"), 3)` and Recall is `r round(subset(tests, select = "rec_black", test_method == "bper" & test_type == "state_np"), 3)`. This difference in predictive performance between geographies suggests patterns of racial segregation in at least the North Carolina and Florida sample. 
+Figure 3 displays the Precision and Recall scores broken down by ethnorace for the same models used in Figure 2.[^11] For both Whites and Hispanics, Precision and Recall remain high across all models. Using the most input data available (the models on the far right of the figure), White Precision and Recall are `r round(subset(tests, select = "prec_white", test_method == "bper" & test_type == "all"), 3)` and `r round(subset(tests, select = "rec_white", test_method == "bper" & test_type == "all"), 3)`, respectively. Hispanic Precision and Recall in this model are `r round(subset(tests, select = "prec_hispanic", test_method == "bper" & test_type == "all"), 3)` and `r round(subset(tests, select = "rec_hispanic", test_method == "bper" & test_type == "all"), 3)`, respectively. These metrics are uniformly lower for Asians---likely reflecting the relative rarity of Asian individuals in the sample. When using Census blocks as the unit of geography, predictions for African Americans are strong (Precision: `r round(subset(tests, select = "prec_black", test_method == "bper" & test_type == "all"), 3)`, Recall: `r round(subset(tests, select = "rec_black", test_method == "bper" & test_type == "all"), 3)`). But predictive performance falls with broader geolocations. At the state level, without party ID, Black Precision is `r round(subset(tests, select = "prec_black", test_method == "bper" & test_type == "state_np"), 3)` and Recall is `r round(subset(tests, select = "rec_black", test_method == "bper" & test_type == "state_np"), 3)`. This difference in predictive performance between geographies suggests patterns of racial segregation in at least the North Carolina and Florida sample. 
 
 [^11]: The model names are abbreviated by the level of geography, and all use first name and last name inputs. Models with *(np)* do not use the party ID inputs.
 
@@ -305,14 +305,14 @@ ggplot(accuracy, aes(x = test_type, y = diff)) +
   geom_bar(stat = "identity", fill = "darkcyan") +
   theme_minimal() + 
   labs(y = "Difference in Accuracy", x = "") +
-  scale_x_discrete(name = "Model Inputs", limits = c("all", "all_np", "place", "place_np", "county", "county_np"),
-                   labels = c(
+  scale_x_discrete(name = "Model Inputs", limits = rev(c("all", "all_np", "place", "place_np", "county", "county_np")),
+                   labels = rev(c(
                      "all" = "Block \n Multi-Unit \n Party ID \n First Name \n Last Name", 
                      "place" = "Place \n Party ID \n First Name \n Last Name", 
                      "county" = "County \n Party ID \n First Name \n Last Name", 
                      "all_np" = "Block \n Multi-Unit \n First Name \n Last Name", 
                      "place_np" = "Place \n First Name \n Last Name", 
-                     "county_np" = "County \n First Name \n Last Name")) +
+                     "county_np" = "County \n First Name \n Last Name"))) +
   theme(text = element_text(family = "serif"))
 ```
 
@@ -341,14 +341,14 @@ prec_api <-
   scale_fill_identity(guide = F) +
   theme_minimal() + 
   labs(y = "Difference in Precision", x = "", title = "") +
-  scale_x_discrete(name = "", limits = c("all", "all_np", "place", "place_np", "county", "county_np"),
-                   labels = c(
+  scale_x_discrete(name = "", limits = rev(c("all", "all_np", "place", "place_np", "county", "county_np")),
+                   labels = rev(c(
                      "all" = "", 
                      "place" = "", 
                      "county" = "", 
                      "all_np" = "", 
                      "place_np" = "", 
-                     "county_np" = "")
+                     "county_np" = ""))
                    ) +
   theme(text = element_text(family = "serif"))
 
@@ -358,14 +358,14 @@ rec_api <-
   scale_fill_identity(guide = F) +
   theme_minimal() + 
   labs(y = "Difference in Recall", x = "") +
-  scale_x_discrete(name = "Model Inputs", limits = c("all", "all_np", "place", "place_np", "county", "county_np"),
-                   labels = c(
+  scale_x_discrete(name = "Model Inputs", limits = rev(c("all", "all_np", "place", "place_np", "county", "county_np")),
+                   labels = rev(c(
                      "all" = "Block \n Multi-Unit \n Party ID \n First Name \n Last Name", 
                      "place" = "Place \n Party ID \n First Name \n Last Name", 
                      "county" = "County \n Party ID \n First Name \n Last Name", 
                      "all_np" = "Block \n Multi-Unit \n First Name \n Last Name", 
                      "place_np" = "Place \n First Name \n Last Name", 
-                     "county_np" = "County \n First Name \n Last Name")) +
+                     "county_np" = "County \n First Name \n Last Name"))) +
   theme(text = element_text(family = "serif"))
 
 grid.arrange(prec_api, rec_api, nrow = 2)
@@ -391,14 +391,14 @@ prec_black <-
   theme_minimal() + 
   ylim(0, 0.35) +
   labs(y = "Difference in Precision", x = "", title = "") +
-  scale_x_discrete(name = "", limits = c("all", "all_np", "place", "place_np", "county", "county_np"),
-                   labels = c(
+  scale_x_discrete(name = "", limits = rev(c("all", "all_np", "place", "place_np", "county", "county_np")),
+                   labels = rev(c(
                      "all" = "", 
                      "place" = "", 
                      "county" = "", 
                      "all_np" = "", 
                      "place_np" = "", 
-                     "county_np" = "")
+                     "county_np" = ""))
                    ) +
   theme(text = element_text(family = "serif"))
 
@@ -409,14 +409,14 @@ rec_black <-
   theme_minimal() + 
   ylim(-0.3, 0) +
   labs(y = "Difference in Recall", x = "") +
-  scale_x_discrete(name = "Model Inputs", limits = c("all", "all_np", "place", "place_np", "county", "county_np"),
-                   labels = c(
+  scale_x_discrete(name = "Model Inputs", limits = rev(c("all", "all_np", "place", "place_np", "county", "county_np")),
+                   labels = rev(c(
                      "all" = "Block \n Multi-Unit \n Party ID \n First Name \n Last Name", 
                      "place" = "Place \n Party ID \n First Name \n Last Name", 
                      "county" = "County \n Party ID \n First Name \n Last Name", 
                      "all_np" = "Block \n Multi-Unit \n First Name \n Last Name", 
                      "place_np" = "Place \n First Name \n Last Name", 
-                     "county_np" = "County \n First Name \n Last Name")) +
+                     "county_np" = "County \n First Name \n Last Name"))) +
   theme(text = element_text(family = "serif"))
 
 grid.arrange(prec_black, rec_black, nrow = 2)
@@ -440,14 +440,14 @@ prec_hispanic <-
   scale_fill_identity(guide = F) +
   theme_minimal() + 
   labs(y = "Difference in Precision", x = "", title = "") +
-  scale_x_discrete(name = "", limits = c("all", "all_np", "place", "place_np", "county", "county_np"),
-                   labels = c(
+  scale_x_discrete(name = "", limits = rev(c("all", "all_np", "place", "place_np", "county", "county_np")),
+                   labels = rev(c(
                      "all" = "", 
                      "place" = "", 
                      "county" = "", 
                      "all_np" = "", 
                      "place_np" = "", 
-                     "county_np" = "")
+                     "county_np" = ""))
                    ) +
   theme(text = element_text(family = "serif"))
 
@@ -457,14 +457,14 @@ rec_hispanic <-
   scale_fill_identity(guide = F) +
   theme_minimal() + 
   labs(y = "Difference in Recall", x = "") +
-  scale_x_discrete(name = "Model Inputs", limits = c("all", "all_np", "place", "place_np", "county", "county_np"),
-                   labels = c(
+  scale_x_discrete(name = "Model Inputs", limits = rev(c("all", "all_np", "place", "place_np", "county", "county_np")),
+                   labels = rev(c(
                      "all" = "Block \n Multi-Unit \n Party ID \n First Name \n Last Name", 
                      "place" = "Place \n Party ID \n First Name \n Last Name", 
                      "county" = "County \n Party ID \n First Name \n Last Name", 
                      "all_np" = "Block \n Multi-Unit \n First Name \n Last Name", 
                      "place_np" = "Place \n First Name \n Last Name", 
-                     "county_np" = "County \n First Name \n Last Name")) +
+                     "county_np" = "County \n First Name \n Last Name"))) +
   theme(text = element_text(family = "serif"))
 
 grid.arrange(prec_hispanic, rec_hispanic, nrow = 2)
@@ -488,14 +488,14 @@ prec_white <-
   scale_fill_identity(guide = F) +
   theme_minimal() + 
   labs(y = "Difference in Precision", x = "", title = "") +
-  scale_x_discrete(name = "", limits = c("all", "all_np", "place", "place_np", "county", "county_np"),
-                   labels = c(
+  scale_x_discrete(name = "", limits = rev(c("all", "all_np", "place", "place_np", "county", "county_np")),
+                   labels = rev(c(
                      "all" = "", 
                      "place" = "", 
                      "county" = "", 
                      "all_np" = "", 
                      "place_np" = "", 
-                     "county_np" = "")
+                     "county_np" = ""))
                    ) +
   theme(text = element_text(family = "serif"))
 
@@ -505,14 +505,14 @@ rec_white <-
   scale_fill_identity(guide = F) +
   theme_minimal() + 
   labs(y = "Difference in Recall", x = "") +
-  scale_x_discrete(name = "Model Inputs", limits = c("all", "all_np", "place", "place_np", "county", "county_np"),
-                   labels = c(
+  scale_x_discrete(name = "Model Inputs", limits = rev(c("all", "all_np", "place", "place_np", "county", "county_np")),
+                   labels = rev(c(
                      "all" = "Block \n Multi-Unit \n Party ID \n First Name \n Last Name", 
                      "place" = "Place \n Party ID \n First Name \n Last Name", 
                      "county" = "County \n Party ID \n First Name \n Last Name", 
                      "all_np" = "Block \n Multi-Unit \n First Name \n Last Name", 
                      "place_np" = "Place \n First Name \n Last Name", 
-                     "county_np" = "County \n First Name \n Last Name")) +
+                     "county_np" = "County \n First Name \n Last Name"))) +
   theme(text = element_text(family = "serif"))
 
 grid.arrange(prec_white, rec_white, nrow = 2)
