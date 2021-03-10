@@ -1,6 +1,6 @@
 # Florida
 
-files <- list.files(path = here("raw-data", "florida", "20170207_VoterDetail"), 
+files <- list.files(path = here("data-raw", "florida", "20170207_VoterDetail"), 
                     pattern = "*.txt", full.names = T)
 
 fl <- map_df(files, ~read_tsv(., guess_max = 4e4, col_names = F,
@@ -44,7 +44,7 @@ fl_clean <- fl %>%
 
 # Clean Data --------------------------------------------------------------
 
-fl_geo <- read_csv(here("raw-data", "florida", "fl_geocode.csv"), guess_max = 1e7) %>% 
+fl_geo <- read_csv(here("data-raw", "florida", "fl_geocode.csv"), guess_max = 1e7) %>% 
   select(full_address, block = `Full FIPS`, place = `Place FIPS`)
 
 florida <- fl_clean %>% 

@@ -1,6 +1,6 @@
 # North Carolina
 
-nc <- read_tsv(here("raw-data", "north_carolina", "ncvoter_Statewide.txt"))
+nc <- read_tsv(here("data-raw", "north_carolina", "ncvoter_Statewide.txt"))
 
 
 common_surname_prefixes <- c("MC", "DE", "VAN", "DEL", "ST", "LA", "DI", 
@@ -45,7 +45,7 @@ nc_clean <- nc %>%
 
 # Clean Data --------------------------------------------------------------
 
-nc_geo <- read_csv(here("raw-data", "north_carolina", "nc_geocode.csv"), guess_max = 1e6) %>% 
+nc_geo <- read_csv(here("data-raw", "north_carolina", "nc_geocode.csv"), guess_max = 1e6) %>% 
     select(full_address, block = `Full FIPS`, place = `Place FIPS`)
   
 north_carolina <- nc_clean %>% 
