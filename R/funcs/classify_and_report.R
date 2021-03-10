@@ -1,5 +1,5 @@
 
-arg_max_cols <- function(df, num_cols) {
+arg_max_cols_wru <- function(df, num_cols) {
   cols <- df[tail(seq_along(df), num_cols)]
   max_col <- colnames(cols)[max.col(cols)]
   return(max_col)
@@ -90,7 +90,7 @@ predict_race_wru <- function(df, wru_geo, wru_party) {
   
   df <- rbind(df_fl, df_nc)
   
-  df$pred_race <- arg_max_cols(df, 5)
+  df$pred_race <- arg_max_cols_wru(df, 5)
   
   df <- df %>%
     rename(
@@ -117,30 +117,40 @@ predict_race_wru <- function(df, wru_geo, wru_party) {
   
 }
 
-classify_and_report <- function(df, wru = F, wru_geo, wru_party = TRUE, test_type) {
+classify_and_report <- function(df, wru = F, wru_geo, wru_party = TRUE, test_type, prior = "all") {
   if (wru == TRUE) {
     df <- predict_race_wru(df, wru_geo, wru_party) %>%
       mutate(race = if_else(race == "aian", "other", race))
   } else {
-    df <- bper::predict_ethnorace(df) %>%
+    df <- predict_ethnorace(df, prior = prior) %>%
       mutate(
         race = if_else(race == "aian", "other", race),
         pred_race = if_else(pred_race == "aian", "other", pred_race)
       )
+    
+    # df <- df %>%
+    #   select(-pred_race, -prob_aian) %>%
+    #   mutate(prob_white = prob_white,
+    #          prob_black = prob_black + 0.1,
+    #          prob_hispanic = prob_hispanic - 0.15,
+    #          prob_api = prob_api + 0.2,
+    #          prob_other = prob_other)
+    # 
+    # df$pred_race <- arg_max_cols_wru(df, 5)
+    # 
+    # df <- df %>%
+    #   mutate(
+    #     pred_race = case_when(
+    #       pred_race == "prob_white" ~ "white",
+    #       pred_race == "prob_black" ~ "black",
+    #       pred_race == "prob_hispanic" ~ "hispanic",
+    #       pred_race == "prob_api" ~ "api",
+    #       pred_race == "prob_other" ~ "other"
+    #     )
+    #   )
   }
   
-  # df$pred_race <- arg_max_cols(df, 5)
-  #
-  # df <- df %>%
-  #   mutate(
-  #     pred_race = case_when(
-  #       pred_race == "prob_white" ~ "white",
-  #       pred_race == "prob_black" ~ "black",
-  #       pred_race == "prob_hispanic" ~ "hispanic",
-  #       pred_race == "prob_api" ~ "api",
-  #       pred_race == "prob_other" ~ "other"
-  #     )
-  #   )
+
   
   df <- df %>%
     mutate(pred_race = as.factor(pred_race),
