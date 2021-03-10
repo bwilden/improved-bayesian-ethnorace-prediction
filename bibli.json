@@ -939,5 +939,93 @@
         "title-short": "Geographic Natural Experiments with Interference",
         "type": "article-journal",
         "volume": "64"
+    },
+    {
+        "id": "trounstine2020",
+        "DOI": "10.1017/S0003055419000844",
+        "ISSN": "0003-0554, 1537-5943",
+        "URL": "https://www.cambridge.org/core/product/identifier/S0003055419000844/type/journal_article",
+        "accessed": {
+            "date-parts": [
+                [
+                    16
+                ]
+            ]
+        },
+        "author": [
+            {
+                "family": "Trounstine",
+                "given": "Jessica"
+            }
+        ],
+        "container-title": "American Political Science Review",
+        "container-title-short": "Am Polit Sci Rev",
+        "issue": "2",
+        "issued": {
+            "date-parts": [
+                [
+                    2020
+                ]
+            ]
+        },
+        "language": "en",
+        "page": "443-455",
+        "source": "DOI.org (Crossref)",
+        "title": "The Geography of Inequality: How Land Use Regulation Produces Segregation",
+        "title-short": "The Geography of Inequality",
+        "type": "article-journal",
+        "volume": "114"
+    },
+    {
+        "id": "burch2013",
+        "author": [
+            {
+                "family": "Burch",
+                "given": "Traci"
+            }
+        ],
+        "issued": {
+            "date-parts": [
+                [
+                    2013
+                ]
+            ]
+        },
+        "title": "Trading Democracy for Justice: Criminal Convictions and the Decline of Neighborhood Political Participation",
+        "type": "book"
+    },
+    {
+        "id": "abott2020",
+        "DOI": "10.1111/ajps.12512",
+        "ISSN": "0092-5853, 1540-5907",
+        "URL": "https://onlinelibrary.wiley.com/doi/10.1111/ajps.12512",
+        "accessed": {},
+        "author": [
+            {
+                "family": "Abott",
+                "given": "Carolyn"
+            },
+            {
+                "family": "Magazinnik",
+                "given": "Asya"
+            }
+        ],
+        "container-title": "American Journal of Political Science",
+        "container-title-short": "American Journal of Political Science",
+        "issue": "3",
+        "issued": {
+            "date-parts": [
+                [
+                    2020,
+                    7
+                ]
+            ]
+        },
+        "language": "en",
+        "page": "717-733",
+        "source": "DOI.org (Crossref)",
+        "title": "At‐Large Elections and Minority Representation in Local Government",
+        "type": "article-journal",
+        "volume": "64"
     }
 ]
