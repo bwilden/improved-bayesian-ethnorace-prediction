@@ -5,120 +5,267 @@ date: "1/3/2021"
 output: html_document
 ---
 
-```{r}
+```{r Libraries}
 library(tidyverse)
-library(bper)
 library(caret)
+library(here)
 library(wru)
 ```
 
 
-```{r}
+```{r Data Loading}
 census_api <- "5e4c2b8438222753a7f4753fa78855eca73b9950"
 
 load(file = "data/census_fl.RData")
 load(file = "data/census_nc.RData")
-load_bperdata(destination = "data", include_blocks = T)
+# load_bperdata(destination = "data", include_blocks = T)
 
 load(file = "data/nc_fl.rda")
 load(file = "data/nc_fl_wru.rda")
+
+source(here("R", "prep", "clean_race_data.R"))
+source(here("R", "funcs", "predict_ethnorace.R"))
+source(here("R", "funcs", "classify_and_report.R"))
 ```
 
-```{r}
+```{r test test}
 source(here("R", "funcs", "classify_and_report.R"))
-nc_fl_wru %>% 
-  sample_n(1000) %>% 
-  classify_and_report(wru = T, wru_geo = "county", test_name = "dk")
-```
+source(here("R", "funcs", "predict_ethnorace.R"))
 
-
-```{r}
-source(here("R", "funcs", "classify_and_report.R"))
-
-# Set up test data
-sample_vec <- sample(1:nrow(nc_fl), 2e6, replace = FALSE)
-nc_fl_tests <- nc_fl[sample_vec, ] 
-  # select(-c(birth_year, female))
+sample_vec <- sample(1:nrow(nc_fl), 1e5, replace = FALSE)
+nc_fl_tests <- nc_fl[sample_vec, ] %>% 
+  select(-c(birth_year, female, first_name, apartment))
 
 nc_fl_wru_tests <- nc_fl_wru[sample_vec, ]
 
 # Test results holder
-tests <- data.frame()
+t <- data.frame()
+
 
 # Full comparisons
 wru_all <- nc_fl_wru_tests %>% 
-  classify_and_report(wru = T, wru_geo = "block", test_type = "all")
+  filter(!is.na(block)) %>% 
+  classify_and_report(wru = T, wru_geo = "place", test_type = "all")
 bper_all <- nc_fl_tests %>% 
-  classify_and_report(test_type = "all")
-tests <- rbind(tests, wru_all, bper_all)
+  filter(!is.na(block)) %>% 
+  classify_and_report(test_type = "all", prior = "last_name")
+t <- rbind(t, wru_all, bper_all)
 
-# Place
+```
+
+
+
+```{r wru Models}
+source(here("R", "funcs", "classify_and_report.R"))
+source(here("R", "funcs", "predict_ethnorace.R"))
+
+sample_vec <- sample(1:nrow(nc_fl), 3e6, replace = FALSE)
+nc_fl_wru_tests <- nc_fl_wru[sample_vec, ]
+
+wru_all <- nc_fl_wru_tests %>% 
+  filter(!is.na(block)) %>% 
+  classify_and_report(wru = T, wru_geo = "block", test_type = "all")
 wru_place <- nc_fl_wru_tests %>% 
   filter(!is.na(place)) %>% 
   classify_and_report(wru = T, wru_geo = "place", test_type = "place")
-bper_place <- nc_fl_tests %>% 
-  select(-c(block, apartment)) %>% 
-  filter(!is.na(place)) %>% 
-  classify_and_report(test_type = "place")
-tests <- rbind(tests, wru_place, bper_place)
-
-# Zip
-bper_zip <- nc_fl_tests %>% 
-  select(-c(block, place, apartment)) %>% 
-  classify_and_report(test_type = "zip")
-tests <- rbind(tests, bper_zip)
-
-# County
 wru_county <- nc_fl_wru_tests %>% 
+  filter(!is.na(county)) %>% 
   classify_and_report(wru = T, wru_geo = "county", test_type = "county")
-bper_county <- nc_fl_tests %>% 
-  select(-c(block, place, zip, apartment)) %>% 
-  classify_and_report(test_type = "county")
-tests <- rbind(tests, wru_county, bper_county)
-
-# State
-bper_state <- nc_fl_tests %>% 
-  select(-c(block, place, zip, county, apartment)) %>% 
-  classify_and_report(test_type = "state")
-tests <- rbind(tests, bper_state)
-
-# No Party
 wru_all_np <- nc_fl_wru_tests %>% 
+  filter(!is.na(block)) %>% 
   select(-PID) %>% 
   classify_and_report(wru = T, wru_geo = "block", wru_party = F, test_type = "all_np")
-bper_all_np <- nc_fl_tests %>% 
-  select(-party) %>% 
-  classify_and_report(test_type = "all_np")
-tests <- rbind(tests, wru_all_np, bper_all_np)
-
 wru_place_np <- nc_fl_wru_tests %>% 
   select(-PID) %>%
   filter(!is.na(place)) %>% 
   classify_and_report(wru = T, wru_geo = "place", wru_party = F, test_type = "place_np")
+wru_county_np <- nc_fl_wru_tests %>% 
+  filter(!is.na(county)) %>% 
+  select(-PID) %>% 
+  classify_and_report(wru = T, wru_geo = "county", wru_party = F, test_type = "county_np")
+```
+
+
+```{r wru Models}
+source(here("R", "funcs", "classify_and_report.R"))
+source(here("R", "funcs", "predict_ethnorace.R"))
+nc_fl_tests <- nc_fl[sample_vec, ]
+
+tests <- data.frame()
+
+bper_all <- nc_fl_tests %>% 
+  filter(block %in% blocks$block) %>% 
+  classify_and_report(test_type = "all")
+tests <- rbind(tests, wru_all, bper_all)
+
+bper_all_np <- nc_fl_tests %>% 
+  filter(block %in% blocks$block) %>% 
+  select(-party) %>% 
+  classify_and_report(test_type = "all_np")
+tests <- rbind(tests, wru_all_np, bper_all_np)
+
+bper_place <- nc_fl_tests %>% 
+  select(-c(block, apartment)) %>% 
+  filter(place %in% places$place) %>% 
+  classify_and_report(test_type = "place")
+tests <- rbind(tests, wru_place, bper_place)
+
+bper_county <- nc_fl_tests %>% 
+  filter(county %in% counties$county) %>% 
+  select(-c(block, place, zip, apartment)) %>% 
+  classify_and_report(test_type = "county")
+tests <- rbind(tests, wru_county, bper_county)
+
 bper_place_np <- nc_fl_tests %>% 
   select(-c(party, block, apartment)) %>% 
-  filter(!is.na(place)) %>% 
+  filter(place %in% places$place) %>% 
   classify_and_report(test_type = "place_np")
 tests <- rbind(tests, wru_place_np, bper_place_np)
 
-bper_zip_np <- nc_fl_tests %>% 
-  select(-c(party, block, place, apartment)) %>% 
-  classify_and_report(test_type = "zip_np")
-tests <- rbind(tests, bper_zip_np)
-
-wru_county_np <- nc_fl_wru_tests %>% 
-  select(-PID) %>% 
-  classify_and_report(wru = T, wru_geo = "county", wru_party = F, test_type = "county_np")
 bper_county_np <- nc_fl_tests %>% 
+  filter(county %in% counties$county) %>% 
   select(-c(party, block, place, zip, apartment)) %>% 
   classify_and_report(test_type = "county_np")
 tests <- rbind(tests, wru_county_np, bper_county_np)
 
-bper_state_np <- nc_fl_tests %>% 
-  select(-c(party, block, place, zip, county, apartment)) %>% 
-  classify_and_report(test_type = "state_np")
-tests <- rbind(tests, bper_state_np)
 
-save(tests, file = here("data", "tests.rda"))
+
+ bper_zip <- nc_fl_tests %>%
+   filter(zip %in% zips$zip) %>%
+   select(-c(block, place, apartment)) %>%
+   classify_and_report(test_type = "zip")
+ tests <- rbind(tests, bper_zip)
+
+ bper_zip_np <- nc_fl_tests %>%
+   filter(zip %in% zips$zip) %>%
+   select(-c(party, block, place, apartment)) %>%
+   classify_and_report(test_type = "zip_np")
+ tests <- rbind(tests, bper_zip_np)
+
+ bper_state <- nc_fl_tests %>%
+   filter(!is.na(state)) %>%
+   select(-c(block, place, zip, county, apartment)) %>%
+   classify_and_report(test_type = "state")
+ tests <- rbind(tests, bper_state)
+
+ bper_state_np <- nc_fl_tests %>%
+   filter(!is.na(state)) %>%
+   select(-c(party, block, place, zip, county, apartment)) %>%
+   classify_and_report(test_type = "state_np")
+ tests <- rbind(tests, bper_state_np)
+
+# save(tests, file = here("data", "tests.rda"))
+```
+
+
+
+
+```{r}
+a <- nc_fl2 %>% 
+  sample_n(1000) %>% 
+  select(-block)
+
+a %>%   
+  predict_ethnorace()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+source(here("R", "funcs", "classify_and_report.R"))
+
+nc_fl_tests <- nc_fl %>% 
+  sample_n(2e6) %>% 
+  predict_ethnorace() %>%
+  mutate(
+    race = if_else(race == "aian", "other", race),
+    pred_race = if_else(pred_race == "aian", "other", pred_race)
+  )
+```
+
+```{r}
+# Recall investigation
+
+white_wrong <- nc_fl_tests %>% 
+  filter(race == "white", pred_race != "white")
+black_wrong <- nc_fl_tests %>% 
+  filter(race == "black", pred_race != "black")
+hispanic_wrong <- nc_fl_tests %>% 
+  filter(race == "hispanic", pred_race != "hispanic")
+api_wrong <- nc_fl_tests %>% 
+  filter(race == "api", pred_race != "api")
+other_wrong <- nc_fl_tests %>% 
+  filter(race == "other", pred_race != "other")
+
+
+prop.table(table(white_wrong$pred_race))
+nrow(white_wrong)
+prop.table(table(black_wrong$pred_race))
+nrow(black_wrong)
+prop.table(table(hispanic_wrong$pred_race))
+nrow(hispanic_wrong)
+prop.table(table(api_wrong$pred_race))
+nrow(api_wrong)
+prop.table(table(other_wrong$pred_race))
+nrow(other_wrong)
+
+```
+
+```{r}
+# Precision investigation
+
+white_wrong <- nc_fl_tests %>% 
+  filter(race != "white", pred_race == "white")
+black_wrong <- nc_fl_tests %>% 
+  filter(race != "black", pred_race == "black")
+hispanic_wrong <- nc_fl_tests %>% 
+  filter(race != "hispanic", pred_race == "hispanic")
+api_wrong <- nc_fl_tests %>% 
+  filter(race != "api", pred_race == "api")
+other_wrong <- nc_fl_tests %>% 
+  filter(race != "other", pred_race == "other")
+
+
+prop.table(table(white_wrong$race))
+nrow(white_wrong)
+prop.table(table(black_wrong$race))
+nrow(black_wrong)
+prop.table(table(hispanic_wrong$race))
+nrow(hispanic_wrong)
+prop.table(table(api_wrong$race))
+nrow(api_wrong)
+prop.table(table(other_wrong$race))
+nrow(other_wrong)
+
+```
+
+
+
+
+
+
+
+```{r}
+a <- census_geo_api(key = census_api, state = "FL", geo = "county")
 ```
 
