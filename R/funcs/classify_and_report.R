@@ -94,11 +94,11 @@ predict_race_wru <- function(df, wru_geo, wru_party) {
   
   df <- df %>%
     rename(
-      pred_white = pred.whi,
-      pred_black = pred.bla,
-      pred_hispanic = pred.his,
-      pred_api = pred.asi,
-      pred_other = pred.oth
+      prob_white = pred.whi,
+      prob_black = pred.bla,
+      prob_hispanic = pred.his,
+      prob_api = pred.asi,
+      prob_other = pred.oth
     ) %>%
     mutate(
       pred_race = case_when(

@@ -463,12 +463,12 @@ predict_ethnorace <- function(df, dichotomize = FALSE, prior) {
   if (dichotomize == TRUE) {
     df <- df %>%
       dplyr::mutate(
-        black = factor(ifelse(pred_race == "black", 1, 0), levels = c(1, 0)),
-        white = factor(ifelse(pred_race == "white", 1, 0), levels = c(1, 0)),
-        hispanic = factor(ifelse(pred_race == "hispanic", 1, 0), levels = c(1, 0)),
-        api = factor(ifelse(pred_race == "api", 1, 0), levels = c(1, 0)),
-        aian = factor(ifelse(pred_race == "aian", 1, 0), levels = c(1, 0)),
-        other = factor(ifelse(pred_race == "other", 1, 0), levels = c(1, 0))
+        pred_black = factor(ifelse(pred_race == "black", 1, 0), levels = c(1, 0)),
+        pred_white = factor(ifelse(pred_race == "white", 1, 0), levels = c(1, 0)),
+        pred_hispanic = factor(ifelse(pred_race == "hispanic", 1, 0), levels = c(1, 0)),
+        pred_api = factor(ifelse(pred_race == "api", 1, 0), levels = c(1, 0)),
+        pred_aian = factor(ifelse(pred_race == "aian", 1, 0), levels = c(1, 0)),
+        pred_other = factor(ifelse(pred_race == "other", 1, 0), levels = c(1, 0))
       )
   }
   

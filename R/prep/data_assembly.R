@@ -13,15 +13,23 @@ source(here("R", "prep", "north_carolina.R"))
 load(file = here("data", "florida.rda"))
 load(file = here("data", "north_carolina.rda"))
 
-nc_fl <- rbind(florida, north_carolina)
+nc_fl <- rbind(florida, north_carolina) %>% 
+  filter(!(is.na(race))) %>% 
+  mutate(VoterID = as.character(row_number()),
+         obs_black = factor(ifelse(race == "black", 1, 0), levels = c(1, 0)),
+         obs_white = factor(ifelse(race == "white", 1, 0), levels = c(1, 0)),
+         obs_hispanic = factor(ifelse(race == "hispanic", 1, 0), levels = c(1, 0)),
+         obs_api = factor(ifelse(race == "api", 1, 0), levels = c(1, 0)),
+         obs_aian = factor(ifelse(race == "aian", 1, 0), levels = c(1, 0)),
+         obs_other = factor(ifelse(race == "other", 1, 0), levels = c(1, 0)))
+
 save(nc_fl, file = here("data", "nc_fl.rda"))
 
 
 # WRU Data ----------------------------------------------------------------
 
 nc_fl_wru <- nc_fl %>% 
-  mutate(VoterID = row_number(),
-         surname = last_name,
+  mutate(surname = last_name,
          county = str_sub(block, 3, 5),
          tract = str_sub(block, 6, 11),
          block = str_sub(block, 12, 15),
@@ -31,7 +39,7 @@ nc_fl_wru <- nc_fl %>%
          PID = case_when(party == "UNA" ~ 0,
                          party == "DEM" ~ 1,
                          party == "REP" ~ 2)) %>% 
-  select(VoterID, surname, state, county, tract, block, place, age, sex, PID, race)
+  select(VoterID, surname, state, county, tract, block, place, age, sex, PID, race, contains("obs"))
 
 save(nc_fl_wru, file = here("data", "nc_fl_wru.rda"))
 
