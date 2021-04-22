@@ -1027,5 +1027,47 @@
         "title": "At‐Large Elections and Minority Representation in Local Government",
         "type": "article-journal",
         "volume": "64"
+    },
+    {
+        "id": "hepburn2020",
+        "DOI": "10.15195/v7.a27",
+        "ISSN": "23306696",
+        "URL": "https://sociologicalscience.com/articles-v7-27-649/",
+        "accessed": {
+            "date-parts": [
+                [
+                    2
+                ]
+            ]
+        },
+        "author": [
+            {
+                "family": "Hepburn",
+                "given": "Peter"
+            },
+            {
+                "family": "Louis",
+                "given": "Renee"
+            },
+            {
+                "family": "Desmond",
+                "given": "Matthew"
+            }
+        ],
+        "container-title": "Sociological Science",
+        "container-title-short": "SocScience",
+        "issued": {
+            "date-parts": [
+                [
+                    2020
+                ]
+            ]
+        },
+        "language": "en",
+        "page": "649-662",
+        "source": "DOI.org (Crossref)",
+        "title": "Racial and Gender Disparities among Evicted Americans",
+        "type": "article-journal",
+        "volume": "7"
     }
 ]
