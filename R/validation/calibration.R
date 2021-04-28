@@ -2,7 +2,7 @@
 
 # Calibration -------------------------------------------------------------
 
-N <- 3e6
+N <- 2e7
 
 sample_vec <- sample(1:nrow(nc_fl), N, replace = FALSE)
 
@@ -56,11 +56,27 @@ bper_bs_other <- brierize(bper_cal$prob_other, bper_cal$obs_other)
 
 # Save Results ------------------------------------------------------------
 
-cal_data <- list(wru_cal_black, wru_cal_api, wru_cal_hispanic, wru_cal_white, 
-                 wru_cal_other, wru_bs_black, wru_bs_api, wru_bs_hispanic, 
-                 wru_bs_white, wru_bs_other, bper_cal_black, bper_cal_api, 
-                 bper_cal_aian, bper_cal_hispanic, bper_cal_white, bper_cal_other, 
-                 bper_bs_black, bper_bs_api, bper_bs_aian, bper_bs_hispanic, 
-                 bper_bs_white, bper_bs_other)
+cal_data <- list("wru_cal_black" = wru_cal_black,
+                 "wru_cal_api" = wru_cal_api,
+                 "wru_cal_hispanic" = wru_cal_hispanic,
+                 "wru_cal_white" = wru_cal_white,
+                 "wru_cal_other" = wru_cal_other,
+                 "wru_bs_black" = wru_bs_black,
+                 "wru_bs_api" = wru_bs_api,
+                 "wru_bs_hispanic" = wru_bs_hispanic,
+                 "wru_bs_white" = wru_bs_white,
+                 "wru_bs_other" = wru_bs_other,
+                 "bper_cal_black" = bper_cal_black,
+                 "bper_cal_api" = bper_cal_api,
+                 "bper_cal_aian" = bper_cal_aian,
+                 "bper_cal_hispanic" = bper_cal_hispanic,
+                 "bper_cal_white" = bper_cal_white,
+                 "bper_cal_other" = bper_cal_other,
+                 "bper_bs_black" = bper_bs_black,
+                 "bper_bs_api" = bper_bs_api,
+                 "bper_bs_aian" = bper_bs_aian,
+                 "bper_bs_hispanic" = bper_bs_hispanic,
+                 "bper_bs_white" = bper_bs_white,
+                 "bper_bs_other" = bper_bs_other)
 
 save(cal_data, file = here("data", "cal_data.rda"))
