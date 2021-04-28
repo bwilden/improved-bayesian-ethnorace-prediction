@@ -1069,5 +1069,38 @@
         "title": "Racial and Gender Disparities among Evicted Americans",
         "type": "article-journal",
         "volume": "7"
+    },
+    {
+        "id": "bonica",
+        "author": [
+            {
+                "family": "Bonica",
+                "given": "Adam"
+            }
+        ],
+        "language": "en",
+        "page": "18",
+        "source": "Zotero",
+        "title": "Ideology and Interests in the Political Marketplace",
+        "type": "article-journal"
+    },
+    {
+        "id": "borjas1999",
+        "author": [
+            {
+                "family": "Borjas",
+                "given": "George J"
+            }
+        ],
+        "issued": {
+            "date-parts": [
+                [
+                    1999
+                ]
+            ]
+        },
+        "publisher": "Princeton University Press",
+        "title": "Heaven’s Door",
+        "type": "book"
     }
 ]
