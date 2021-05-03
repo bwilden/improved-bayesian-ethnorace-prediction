@@ -1085,22 +1085,21 @@
         "type": "article-journal"
     },
     {
-        "id": "borjas1999",
+        "id": "zadrozny",
         "author": [
             {
-                "family": "Borjas",
-                "given": "George J"
+                "family": "Zadrozny",
+                "given": "Bianca"
+            },
+            {
+                "family": "Elkan",
+                "given": "Charles"
             }
         ],
-        "issued": {
-            "date-parts": [
-                [
-                    1999
-                ]
-            ]
-        },
-        "publisher": "Princeton University Press",
-        "title": "Heaven’s Door",
-        "type": "book"
+        "language": "en",
+        "page": "8",
+        "source": "Zotero",
+        "title": "Obtaining calibrated probability estimates from decision trees and naive Bayesian classiﬁers",
+        "type": "article-journal"
     }
 ]

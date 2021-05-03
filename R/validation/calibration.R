@@ -2,7 +2,7 @@
 
 # Calibration -------------------------------------------------------------
 
-N <- 2e7
+N <- 3e6
 
 sample_vec <- sample(1:nrow(nc_fl), N, replace = FALSE)
 
@@ -37,7 +37,8 @@ wru_bs_other <- brierize(wru_cal$prob_other, wru_cal$obs_other)
 
 
 bper_cal <- nc_fl[sample_vec, ] %>% 
-  predict_ethnorace(prior = "all", dichotomize = TRUE)
+  predict_ethnorace(prior = "all", dichotomize = TRUE) %>% 
+  mutate(prob_api = prob_api * 2.5)
 
 bper_cal_black <- calibration(obs_black ~ prob_black, data = bper_cal)
 bper_cal_api <- calibration(obs_api ~ prob_api, data = bper_cal)

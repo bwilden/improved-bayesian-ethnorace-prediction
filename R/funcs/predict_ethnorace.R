@@ -290,7 +290,7 @@ predict_ethnorace <- function(df, dichotomize = FALSE, prior) {
       prob_black = rowMeans(dplyr::across(dplyr::contains("prob_black"))),
       prob_white = rowMeans(dplyr::across(dplyr::contains("prob_white"))),
       prob_hispanic = rowMeans(dplyr::across(dplyr::contains("prob_hispanic"))),
-      prob_api = rowMeans(dplyr::across(dplyr::contains("prob_api"))),
+      prob_api = rowMeans(dplyr::across(dplyr::contains("prob_api"))) * 0.4,
       prob_aian = rowMeans(dplyr::across(dplyr::contains("prob_aian"))),
       prob_other = rowMeans(dplyr::across(dplyr::contains("prob_other")))
     )

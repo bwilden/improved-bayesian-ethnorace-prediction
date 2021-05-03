@@ -24,6 +24,7 @@ library(gridExtra)
 library(here)
 library(grid)
 library(caret)
+library(wesanderson)
 ```
 
 ```{r data}
@@ -36,7 +37,7 @@ load(here("data", "sahn_grumbach_figs.rda"))
 
 ```{=tex}
 \begin{singlespace}
-Quantitative social science research on race and ethnicity can be constrained by the lack of available individual-level data with these markers. In response to this issue, methods have been developed to predict individuals' race and ethnicity using Bayes' rule. I expand upon existing methods by incorporating new information into the algorithm. Along with some other adjustments, these improvements lead to substantial gains in predictive performance when validated against official state voter files. The largest of these predictive gains are found for African Americans---a group which existing methods find difficult to predict accurately. Furthermore, I apply my algorithm to previous research using the old methods and demonstrate the substantive implications of switching to more accurate predictions.
+Quantitative social science research on race and ethnicity can be constrained by the lack of available individual-level data with these markers. In response to this issue, methods have been developed to predict individuals' race and ethnicity using Bayes' rule. I expand upon existing methods by incorporating new information into the algorithm. Along with some other adjustments, these improvements lead to substantial gains in predictive performance when validated against official state voter files. The largest of these predictive gains are found for African Americans---a group which existing methods find difficult to predict accurately. Furthermore, I apply my algorithm to published research using the old methods and demonstrate the substantive implications of switching to more accurate predictions.
 \end{singlespace}
 ```
 # Introduction
@@ -47,11 +48,11 @@ To overcome some of these challenges, I describe a method for imputing individua
 
 My implementation builds off existing methods which use a similar prediction algorithm [@elliott2009; @imai2016; @voicu2018]. The method described by Imai and Khanna (2016) in particular, and the associated `R` package `wru`, has become popular in recent studies on race and ethnicity. Its application has been used in work on racial protests and voting patterns [@enos2019]; disparities in campaign financing [@grumbach2020; @grumbach2020a], evictions [@hepburn2020], and voter turnout [@fraga2018]; the impact of electoral institutions on local representation [@abott2020]; and public health issues such as suicide rates [@studdert2020].
 
-My ethnorace prediction method improves upon Imai and Khanna (2016) in several ways. Whereas their method only takes as inputs distributions over surnames, geolocation, political party, age, and gender, my implementation adds information from a nationwide list of first names [@tzioumis2018] as well as address characteristics. Additionally, I incorporate insights from the machine learning literature to further improve predictive performance. The result of these modifications is a substantial increase in predictive power compared to Imai and Khanna (2016) in validation tests. These predictive gains are particularly strong in regards to correctly classifying African Americans individuals---especially in contexts where fine-grain geolocation data are unavailable. My method is available in an easy-to-use `R` package `bper`.[^1]
+My ethnorace prediction method improves upon Imai and Khanna (2016) in several ways. Whereas their method only takes as inputs distributions over surnames, geolocation, political party, age, and gender, my implementation adds information from a nationwide list of first names [@tzioumis2018] as well as address characteristics. Additionally, I incorporate insights from the machine learning literature to further improve predictive performance. The result of these modifications is a substantial increase in predictive power compared to Imai and Khanna (2016) in validation tests. These predictive gains are particularly strong in regards to correctly classifying African Americans---especially in contexts where fine-grain geolocation data are unavailable. Under certain data constraints, the probability that an individual predicted to be Black self-identifies as Black is nearly twice as high. My method is available in an easy-to-use `R` package `bper`.[^1]
 
 [^1]: `bper`: Bayesian Prediction for Ethnicity and Race. <https://github.com/bwilden/bper>
 
-In the next section I provide some background and specifics regarding the inputs and outputs of my ethnorace prediction method. Then I explain the methodology and compare my implementation with previous versions. Next, I demonstrate the predictive performance of my method when validated against the combined North Carolina and Florida voter file ($n$ = 21,164,503). And lastly, I replicate Grumbach and Sahn's (2020) descriptive findings in their study on racial disparities in campaign finance using my method of ethnorace prediction. This demonstrates some of the substantive empirical implications of using improved predictions.
+In the next section I provide some background and specifics regarding the inputs and outputs of my ethnorace prediction method. Then I explain the methodology and compare my implementation with previous versions. Next, I demonstrate the predictive performance of my method when validated against the combined North Carolina and Florida voter file ($n$ = 21,164,503). The inclusion of self-reported ethnorace identifiers in these data allows me to compare my predictions against a ground truth. And lastly, I replicate Grumbach and Sahn's (2020) descriptive findings in their study on racial disparities in campaign finance. I compare the empirical results using my prediction method against those from Imai and Khanna (2016). This demonstrates some of the substantive implications of using improved predictions.
 
 # Data
 
@@ -61,7 +62,7 @@ Before discussing the methodology further, I want to first define what "predicti
 
 [^2]: Non-Hispanic Other Race includes individuals who identify as belonging to two or more race/ethnicities, as well as those who may not identify with the other Census categories.
 
-There are a few benefits to using the Census ethnorace categorization. These definitions capture a common understanding of race and ethnicity in the US, and correspond to the groups studied most frequently in social science research. The data sources of these groups' distributions that serve as inputs to the prediction formula also rely on the Census categorization. There is currently no feasible alternative data source that I know of that offers the same richness as the Census. This also facilitates comparison of my method against previous ethnorace prediction methods.[^3] One downside to using the Census categories, however, is that it obscures substantial heterogeneity that may exist within each group. Within Asian Americans and Latinos, for example, there is considerable variation in terms of national ancestry. Furthermore, the unfortunate necessity of a catch-all Other Race category ensures that important sources of diversity are lost.[^4] Researchers interested in using this ethnorace prediction method should be aware of these shortcomings. Nonetheless, because the output groups correlate strongly with many important outcomes in social science research, there are still many applications where this prediction method will be useful.
+There are several benefits to using the Census ethnorace categorization. These definitions capture a common understanding of race and ethnicity in the US, and correspond to groups studied frequently in social science research. The data sources of these groups' distributions that serve as inputs to the prediction formula also rely on the Census categorization. There is currently no feasible alternative data source that I know of that offers the same level of detail as the Census. This also facilitates comparison of my method against previous ethnorace prediction methods.[^3] One downside to using the Census categories, however, is that it obscures substantial heterogeneity that may exist within each group. Within Asian Americans and Latinos, for example, there is considerable variation in terms of national ancestry. Furthermore, the unfortunate necessity of a catch-all Other Race category, which also includes those who identify as multi-racial, ensures that important sources of diversity are lost.[^4] Researchers interested in using this ethnorace prediction method should be aware of these shortcomings. Nonetheless, because the output groups correlate strongly with many important outcomes in social science research, there are still many applications where this prediction method will be useful.
 
 [^3]: Unlike my method, Imai and Khanna (2016) do not include a separate category for American Indian and Alaska Native. In order to create similar comparison groups, I recode all predicted American Indian and Alaska Native individuals as Other Race during the validation exercises. If desired, however, the `bper` package will produce predicted probabilities for the American Indian and Alaska Native category.
 
@@ -75,7 +76,7 @@ The first names list I use comes from Tzioumis (2017). It is drawn from mortgage
 
 ### Last Names
 
-For my last names data, I draw from the 2010 Census Surnames List.[^5] This list comes from the 2010 decennial Census and contains over 160,000 common US last names (those occurring 100 or more times in the population). I also append any last names from the 2000 Census Surnames List that are not found in the 2010 list. This increases the probability the algorithm will match an individual's last name. Like the first names list, these data include counts of individuals in each of the six ethnorace categories across each last name. Once the 2020 Census Surnames List is released, these data will be readily incorporated as well.[^6]
+For my last names data, I draw from the 2010 Census Surnames List.[^5] This list comes from the 2010 decennial Census and contains over 160,000 common US last names (those occurring 100 or more times in the population). I also append any last names from the 2000 Census Surnames List that are not found in the 2010 list to increase the probability the algorithm will match an individual's last name. Like the first names list, these data include counts of individuals in each of the six ethnorace categories across each last name. Once the 2020 Census Surnames List is released, these data will be readily incorporated as well.[^6]
 
 [^5]: <https://www.census.gov/topics/population/genealogy/data/2010_surnames.html>
 
@@ -83,7 +84,7 @@ For my last names data, I draw from the 2010 Census Surnames List.[^5] This list
 
 ### Geolocations
 
-My ethnorace distributions by geographies come from the 2010 decennial Census, accessed via IPUMS NHGIS.[^7] In decreasing order of mean population, these geographies include *state*, *county*, *Census place*, *ZIP code*, and *Census block*. Predictions tend to improve with more precise levels of geography. With this in mind, my implementation automatically matches each individual to the most fine-grain level of geography available. As with the last names input data, once the 2020 Census is released the algorithm will include the updated geolocation distributions.
+My ethnorace distributions by geolocations come from the 2010 decennial Census, accessed via IPUMS NHGIS.[^7] In decreasing order of mean population, these geographies include *State*, *County*, *Census Place*, *ZIP Code*, and *Census Block*. Predictions tend to improve with more precise levels of geography. With this in mind, my implementation automatically matches each individual to the most fine-grain level of geography available. As with the last names input data, once the 2020 Census data is released the algorithm will include the updated geolocation distributions.
 
 [^7]: Steven Manson, Jonathan Schroeder, David Van Riper, Tracy Kugler, and Steven Ruggles. IPUMS National Historical Geographic Information System: Version 15.0 [dataset]. Minneapolis, MN: IPUMS. 2020. <http://doi.org/10.18128/D050.V15.0>
 
@@ -113,11 +114,11 @@ If any cell in the input data is empty (i.e. if there are no individuals of a pa
 
 # Methodology
 
-In general terms, the method computes predicted probabilities for each of the six aforementioned ethnorace categories for each individual. Then, each individual is classified into the category corresponding to the highest predicted probability. These predicted probabilities can be stated more formally as the conditional probability of identifying as a particular ethnorace for an individual with a particular profile of first name, last name, geolocation, party ID, age, gender, and address type. Bayes' rule provides a template for how to answer this sort of conditional probability problem.
+In general terms, the method computes predicted probabilities for each of the six aforementioned ethnorace categories for each individual. Then each individual is classified into the category corresponding to the highest predicted probability. These predicted probabilities can be stated more formally as the conditional probability of identifying as a particular ethnorace for an individual with a particular profile of first name, last name, geolocation, party ID, age, gender, and address type. Bayes' rule provides a template for how to answer this sort of conditional probability problem.
 
 $$Pr(R=r|X) = \frac{Pr(X|R=r)Pr(R=r)}{Pr(X)} \qquad (1)$$
 
-Where $R$ is an individual's true ethnorace, $r$ is one of six possible ethnorace categories (White, Black, Asian, Native American, Hispanic, or Other race), and $X$ is the joint probability of an individual having a particular profile of attributes (first name, last name, geolocation, party ID, age, gender, and address type). Unfortunately, the joint probability $X$ in Equation is intractable due to both data constraints and the astronomically large number of combinations of possible attribute profiles. If however, we assume conditional independence of ethnorace among each attribute in $X$, we can rewrite Equation (1) in terms of less complex conditional probabilities:
+Where $R$ is an individual's true ethnorace, $r$ is one of six possible ethnorace categories (White, Black, Asian, Native American, Hispanic, or Other race), and $X$ is the joint probability of an individual having a particular profile of attributes (first name, last name, geolocation, party ID, age, gender, and address type). Unfortunately, the joint probability $X$ in Equation (1) is intractable due to both data constraints and the astronomically large number of combinations of possible attribute profiles. If however, we assume conditional independence of ethnorace among each attribute in $X$, we can rewrite Equation (1) in terms of less complex conditional probabilities:
 
 $$
 Pr(R=r|X) = \frac{Pr(R=r|x')\prod\limits_{j=1}^6Pr(x_j|R=r)}{\sum\limits_{i=1}^{6} Pr(R=r_i|x')\prod\limits_{j=1}^6Pr(x_j|R=r_i)} \qquad (2)
@@ -129,27 +130,27 @@ Where $x$ is the vector of individual attributes indexed by $j$. The particular 
 
 The conditional independence assumption necessary for transforming equation (1) to (2) says that knowing both a particular attribute of an individual, and that individual's ethnorace, should give us no extra knowledge of any other attribute for that individual. Stated formally, $Pr(x_j|R=r,X) = Pr(x_j|R=r)$ for all $x_j$. This assumption is almost certainly violated in the present context. One example that has been demonstrated empirically is that last name distributions by race vary across regions in the US [@crabtree2018]. Violations of the conditional independence assumption are commonplace in most applications of similar "naive" Bayes classification algorithms. Nevertheless, these prediction methods perform well in many contexts [@lewis1998; @domingos1997; @rish2001]. This is likely because of the decision rule governing the final classifications---the posterior probabilities of the true class do not have to necessarily be statistically valid, they only need to be higher than those of every other class to be accurately classified.
 
-Fortunately, as I will demonstrate, the predicted probabilities produced by my method are actually very well calibrated. This means that, unlike typical naive Bayes predicted probabilities, they accurately reflect the uncertainty in the algorithm's ethnorace predictions. Therefore researchers should feel confident in incorporating these measures of uncertainty into their analyses when using the method.
+Fortunately, as I will demonstrate, the predicted probabilities produced by my method are actually very well calibrated. This means that, unlike typical naive Bayes predicted probabilities which cluster close to 0 and 1 [@zadrozny], the output probabilities from my algorithm accurately reflect the uncertainty in the predictions. Therefore researchers can feel confident in incorporating these measures of uncertainty into their analyses when using the method if they so choose.
 
 # Validation
 
-To test the performance of the model, I apply the predictions to the combined North Carolina and Florida State voter file.[^12] These files contain snapshots of the registered voters in their respective states and provide individual-level data for first names, last names, address, political party, age, gender, and crucially self-identified ethnorace. After combining the two voter files, I then geocoded each unique address in the sample. This allowed me to match individual observations to Census places and blocks, and ZIP codes. Then I applied the prediction algorithm described above using the `bper` package and calculated each individuals' predicted ethnorace. In order to compare my method against an existing benchmark, I also used the `wru` package [@imai2016] to calculate ethnorace predictions for the same individuals.
+To test the performance of the model, I apply the predictions to the combined North Carolina and Florida State voter file.[^12] These files contain snapshots of the registered voters in their respective states and provide individual-level data for first names, last names, address, political party, age, gender, and crucially self-identified ethnorace. After combining the two voter files, I then geocoded each unique address in the sample. This allowed me to match individual observations to Census places and blocks, and ZIP Codes. Then I applied the prediction algorithm described above using the `bper` package and calculated each individuals' predicted ethnorace. In order to compare my method against an existing benchmark, I also used the `wru` package [@imai2016] to calculate ethnorace predictions for the same individuals.
 
 [^12]: Retrieved May 2020
 
-Unlike typical machine learning techniques, my prediction method does not fit the model on some subsample, or training set, from these data and then compare predictions against a held-out test set. Instead, the conditional probabilities for each attribute and ethnorace described above are merged into voter file from the input data sources. This allows the entire voter file to be used for validation. And because the input data come from nationally representative samples, the risk of overfitting due to any peculiarities of the North Carolina/Florida electorate are minimized. Together, these two states represent 21,164,503 individuals. Compared to nationwide percentages, Florida has a higher proportion of Hispanics and North Carolina has a higher proportion of African Americans. When combined they form a reasonably ethnoracially diverse population---2% Asian, 16% Black, 11% Hispanic, 6% Other Race, 65% White.
+Unlike typical machine learning techniques, my prediction method does not fit the model on some subsample, or training set, from these data and then compare predictions against a held-out test set. Instead, the conditional probabilities for each attribute and ethnorace described in the Inputs section are merged into voter file from the input data sources. This allows the entire voter file to be used for validation. And because the input data come from nationally representative samples, the risk of overfitting due to any peculiarities of the North Carolina/Florida electorate are minimized. Together, these two states represent 21,164,503 individuals. Compared to nationwide percentages, Florida has a higher proportion of Hispanics and North Carolina has a higher proportion of African Americans. When combined they form a reasonably ethnoracially diverse population---2% Asian, 16% Black, 11% Hispanic, 6% Other Race, 65% White.
 
 ## Calibration
 
-As mentioned previously, the predicted probabilities produced by `bper` are remarkably well calibrated. This means that they accurately reflect the true probability that an individual belongs to a particular ethnorace. We can test this empirically by dividing the predicted probabilities for each ethnorace, for each individual in the sample, into evenly spaced bins (in this case 11). Then we compute the percentage of observed individuals of a particular ethnorace who fall in each bin. If the predicted probabilities are well calibrated, we would expect to see a one-to-one relationship between these two groups. For example, we should observe roughly 25% of individuals whose predicted probability of being White is in the neighborhood of 0.25 to actually be White.
+As mentioned previously, the predicted probabilities produced by `bper` are remarkably well calibrated. This means that they accurately reflect the true probability that an individual belongs to a particular ethnorace. We can test this empirically by dividing the predicted probabilities for each ethnorace, for each individual in the sample, into evenly spaced bins (in this case 11). Then we compute the percentage of observed individuals of a particular ethnorace who fall in each bin. If the predicted probabilities are well calibrated, we would expect to see a one-to-one relationship between these two groups. For example, under good calibration we should observe roughly 25% of individuals whose predicted probability of being White is in the neighborhood of 0.25 to actually be White.
 
-Figure 1 displays the probability calibration plots for Asian, Black, Hispanic, and White predictions in the Florida/North Carolina sample. As demonstrated by their proximity to the dashed 45 degree line, the predictions for Black, Hispanic, and White individuals appear well calibrated. For each bin of predicted probabilities, we observe very close to the corresponding percentage of individuals of that ethnorace in the sample. Calibration for Asian predictions, on the other hand, appear slightly worse. Across the range of predicted probabilities, we observe between 5 to 20% fewer Asian individuals in each bin. This means that the algorithm has a tendency to overestimate Asian predicted probabilities. The comparatively poorer calibration for Asian Americans foreshadows some similar issues with predictive performance for that group in the next section.
+Figure 1 displays the probability calibration plots for Asian, Black, Hispanic, and White predictions in the Florida/North Carolina sample. As shown by their proximity to the dashed 45 degree line, the predictions for Black, Hispanic, and White individuals appear to be well calibrated. For each bin of predicted probabilities, we observe essentially the corresponding percentage of individuals of that ethnorace in the sample. Calibration for Asian predictions, on the other hand, appear somewhat worse. Across the range of predicted probabilities, we observe between 5 to 20% fewer Asian individuals in each bin. This means that the algorithm has a tendency to overestimate Asian predicted probabilities.
 
 ```{r, fig.cap="Probability Calibration Plots by Ethnorace"}
 cal_api <-
   ggplot(cal_data$bper_cal_api) +
-  geom_line(color = "gray20") +
-  geom_point(color = "gray20") +
+  geom_line(color = wes_palette("Moonrise2", n = 1)) +
+  geom_point(color = wes_palette("Moonrise2", n = 1)) +
   theme_minimal() +
   labs(y = "Observed Asian Percentage",
        x = "Predicted Probability Asian",
@@ -159,8 +160,8 @@ cal_api <-
 
 cal_black <-
   ggplot(cal_data$bper_cal_black) +
-  geom_line(color = "gray20") +
-  geom_point(color = "gray20") +
+  geom_line(color = wes_palette("Moonrise2", n = 1)) +
+  geom_point(color = wes_palette("Moonrise2", n = 1)) +
   theme_minimal() +
   labs(y = "Observed Black Percentage",
        x = "Predicted Probability Black",
@@ -170,8 +171,8 @@ cal_black <-
 
 cal_hispanic <-
   ggplot(cal_data$bper_cal_hispanic) +
-  geom_line(color = "gray20") +
-  geom_point(color = "gray20") +
+  geom_line(color = wes_palette("Moonrise2", n = 1)) +
+  geom_point(color = wes_palette("Moonrise2", n = 1)) +
   theme_minimal() +
   labs(y = "Observed Hispanic Percentage",
        x = "Predicted Probability Hispanic",
@@ -181,8 +182,8 @@ cal_hispanic <-
 
 cal_white <-
   ggplot(cal_data$bper_cal_white) +
-  geom_line(color = "gray20") +
-  geom_point(color = "gray20") +
+  geom_line(color = wes_palette("Moonrise2", n = 1)) +
+  geom_point(color = wes_palette("Moonrise2", n = 1)) +
   theme_minimal() +
   labs(y = "Observed White Percentage",
        x = "Predicted Probability White",
@@ -196,9 +197,11 @@ grid.arrange(cal_api, cal_black, cal_hispanic, cal_white,
 
 Rather than eye-balling plots like those in Figure 1, we can obtain objective measures of calibration by calculating Brier scores for each ethnorace. A Brier score is defined by$$BS = \frac{1}{N}\sum_{t=1}^N(f_t-o_t)^2$$Where $f_t$ is the predicted probability an individual $t$ belongs to a particular ethnorace and $o_t$ is the binary observed ethnorace value (1 if the individual belongs to a particular ethnorace, 0 otherwise). Brier scores range from 0 (good calibration) to 1 (bad calibration) and are analogous to a mean squared error. The Brier scores for the Florida/North Carolina sample are: Asian `r round(cal_data$bper_bs_api, 3)`; Black `r round(cal_data$bper_bs_black, 3)`; Hispanic `r round(cal_data$bper_bs_hispanic, 3)`; White `r round(cal_data$bper_bs_white, 3)`. These are all very low---indicating that the average predicted probability accurately reflects the uncertainty in ethnorace classification. The fact that the Brier score for Asian is lower than every other group might be puzzling given the calibration plots in Figure 1. However, this low score mostly reflects the abundance of low Asian predicted probabilities for individuals who are not Asian. The rarity of Asians in the Florida/North Carolina sample, therefore, produces a low Brier score for this group.
 
+Given the discovery of over-inflated predicted probabilities for Asian Americans, I subsequently adjusted the algorithm to down-weight these values by 50%. Reducing the initial Asian predicted probabilities *greatly* increased overall predictive performance for this group without influencing the results for other ethnoraces. While the down-weighting for Asian predictions can be defended on the basis of the calibration plots in Figure 1, even better predictive results could be obtained through a more structured approach to adjusting predicted probabilities post-hoc. Platt scaling and isotonic regression are two methods developed to improve the calibration, and the subsequent predictive performance, of similar algorithms [@zadrozny].
+
 ## Predictive Performance
 
-While investigating the calibration of the predictions is important for assessing the reliability of the predicted probabilities, calibration does not tell us about how well the algorithm ranks these probabilities when generating final ethnorace predictions. Instead, the most straightforward metric for assessing individual-level predictive performance is the Accuracy score, or Overall Error Rate. This number is the proportion of correctly classified individuals in the sample. I ran models separately for different combinations of input variables to mimic data availability constraints in real-world applications, and then calculated the Accuracy score for each. Figure 2 displays a summary of the results of these different models.
+While investigating the calibration of the predictions is important for assessing the reliability of the predicted probabilities, calibration does not tell us how well the method ranks these probabilities when generating final ethnorace predictions. Instead, the a common metric for assessing individual-level predictive performance is the Accuracy score, or Overall Error Rate. This number is the proportion of correctly classified individuals in the sample. I ran models separately for different combinations of input variables to mimic data availability constraints in real-world applications, and then calculated the Accuracy score for each. Figure 2 displays a summary of the results of these different models.
 
 ```{r, fig.cap="Accuracy Scores by Input Data"}
 acc_bper <- tests %>% 
@@ -206,8 +209,8 @@ acc_bper <- tests %>%
   select(test_type, accuracy)
 
 ggplot(acc_bper, aes(x = test_type, y = accuracy, group = 1)) +
-  geom_line(color = "gray20") +
-  geom_point(size = 3, color = "gray20") +
+  geom_line(color = wes_palette("Moonrise2", n = 1)) +
+  geom_point(size = 3, color = wes_palette("Moonrise2", n = 1)) +
   theme_minimal() +
   ylim(0.75, 0.85) +
   labs(y = "Accuracy Score") +
@@ -227,7 +230,7 @@ ggplot(acc_bper, aes(x = test_type, y = accuracy, group = 1)) +
   theme(text = element_text(family = "serif"), axis.text.x = element_text(size = 7))
 ```
 
-As expected, the model with the greatest number of input data sources, and at the most precise geographic level, on the far right of the figure performs the best in terms of overall Accuracy. Using Census blocks, multi-unit address, party ID, first names, and last names, this model correctly identifies the ethnorace of `r round(subset(tests, select = "accuracy", test_method == "bper" & test_type == "all"), 3) * 100`% of individuals in the sample. The upward trend in model accuracy seen in the figure corresponds to shrinking the size of the geolocation variable used. Moving from state to county, from county to place, from place to ZIP code, and from ZIP code to block all improve the overall predictive performance in terms of overall Accuracy. I include the input for multi-unit occupancy only for the Census block models because I believe this reflects the practical contexts where `bper` might be used. If a researcher has access to individual-level addresses, they should be able to geocode these to find the matching Census blocks and should also be able to parse the residency type (multi-unit or stand-alone). But researchers relying on more aggregate geographies likely do not have access to individual addresses, and hence the residency characteristics, for their sample.[^13] In Figure 2 I pair each geolocation variable with a model missing the party ID input. The gains to predictive performance across all geographies appears roughly uniform with the addition of party ID.
+As expected, the model with the greatest number of input data sources, and at the most precise geographic level, on the far right of the figure performs the best in terms of overall Accuracy. Using Census blocks, multi-unit address, party ID, first names, and last names, this model correctly identifies the ethnorace of `r round(subset(tests, select = "accuracy", test_method == "bper" & test_type == "all"), 3) * 100`% of individuals in the sample. The upward trend in model accuracy seen in the figure corresponds to shrinking the size of the geolocation variable used. Moving from state to county, from county to place, from place to ZIP code, and from ZIP code to block all improve the overall predictive performance in terms of overall Accuracy. I include the input for multi-unit occupancy only for the Census block models because this reflects the practical contexts where `bper` might be used. If a researcher has access to individual-level addresses, they should be able to geocode these to find the matching Census blocks and should also be able to parse the residency type (multi-unit or stand-alone). But researchers relying on more aggregate geographies likely do not have access to individual addresses, and hence the residency characteristics, for their sample.[^13] In Figure 2 I pair each geolocation variable with a model missing the party ID input. The predictive gains from using party ID appear to diminish slightly with smaller levels of geography.
 
 [^13]: In the event that data is available, adding multi-unit occupancy inputs to aggregate geographies, such as ZIP codes, places, counties, or states *greatly* enhances the predictive accuracy of the model.
 
@@ -235,7 +238,7 @@ Accuracy scores, however, are an incomplete metric for assessing predictive perf
 
 Two better metrics to assess group-level predictions are Precision and Recall. Precision is the percentage of correctly classified individuals among all individuals predicted to belong to a specific ethnorace. It answers the question of how likely an individual's predicted ethnorace in our sample matches their true, or self-identified, ethnorace. Recall, also known as Sensitivity or the True Positive Rate, is the percentage of all individuals who belong to a given ethnorace group which the model correctly classifies.
 
-Precision and Recall reflect substantively important concerns for real-world applications of the method, and the inherent trade-offs between optimizing for either metric provide a balanced assessment of the predictive performance. On the one hand, Precision rewards very conservative classification procedures. We could, for example, only classify individuals as White if their posterior probability of being White was greater than 99%. This would ensure a very high Precision score for Whites because we are only capturing the low-hanging fruit. A conservative classification procedure like this, however, would likely result in extremely low Recall for Whites. If we only capture the low-hanging fruit, a greater share of White individuals will be mis-classified as non-White. Likewise, optimizing the algorithm for perfect Recall for Whites is trivial. By classifying every individual as White, we ensure 100% of Whites are correctly classified. Of course this procedure would result in extremely low Precision for Whites because every non-White individual would be classified as White as well. Achieving both high Precision and high Recall, therefore, is a difficult task.
+Precision and Recall reflect substantively important concerns for real-world applications of the method, and the inherent trade-offs between optimizing for either metric provide a balanced assessment of the predictive performance. On the one hand, Precision rewards very conservative classification procedures. We could, for example, only classify individuals as White if their predicted probability of being White was greater than 99%. This would ensure a very high Precision score for Whites because we are only capturing the low-hanging fruit. A conservative classification procedure like this, however, would likely result in extremely low Recall for Whites. If we only capture the low-hanging fruit, a greater share of White individuals will be mis-classified as non-White. Likewise, optimizing the algorithm for perfect Recall for Whites is trivial. By classifying every individual as White, we ensure 100% of Whites are correctly classified. Of course this procedure would result in extremely low Precision for Whites because every non-White individual would be classified as White as well. Achieving both high Precision and high Recall, therefore, is a difficult task.
 
 ```{r, fig.cap="Precision/Recall Scores by Ethnorace and Input Data"}
 metrics_bper <- tests %>% 
@@ -256,7 +259,7 @@ ggplot(metrics_bper, aes(x = test_type, y = value, group = Metric)) +
   geom_point(aes(color = Metric), size = 2) +
   theme_minimal() +
   labs(x = "", y = "Score") +
-  scale_color_manual(values = c("gray20", "gray50")) +
+  scale_color_manual(values = wes_palette("Moonrise2", n = 3)) +
   scale_x_discrete(name = "Model Inputs", limits = rev(c("all", "all_np", "zip", "zip_np", "place", "place_np", "county", "county_np", "state", "state_np")),
                    labels = rev(c(
                      "all" = "Block", 
@@ -274,50 +277,15 @@ ggplot(metrics_bper, aes(x = test_type, y = value, group = Metric)) +
   theme(text = element_text(family = "serif"), axis.text.x = element_text(size = 7, angle = 60))
 ```
 
-Figure 3 displays the Precision and Recall scores broken down by ethnorace for the same models used in Figure 2.[^14] For both Whites and Hispanics, Precision and Recall remain high across all models. Using the most input data available (the models on the far right of the figure), White Precision and Recall are `r round(subset(tests, select = "prec_white", test_method == "bper" & test_type == "all"), 3)` and `r round(subset(tests, select = "rec_white", test_method == "bper" & test_type == "all"), 3)`, respectively. Hispanic Precision and Recall in this model are `r round(subset(tests, select = "prec_hispanic", test_method == "bper" & test_type == "all"), 3)` and `r round(subset(tests, select = "rec_hispanic", test_method == "bper" & test_type == "all"), 3)`, respectively. Hispanic predictive performance across all models likely remains high due to the distinctiveness of Spanish surnames. These metrics are uniformly lower for Asians---likely reflecting the relative rarity of Asian individuals in the sample. When using Census blocks as the unit of geography, predictions for African Americans are quite strong (Precision: `r round(subset(tests, select = "prec_black", test_method == "bper" & test_type == "all"), 3)`, Recall: `r round(subset(tests, select = "rec_black", test_method == "bper" & test_type == "all"), 3)`). But predictive performance falls with broader geolocations. At the state level, without party ID, Black Precision is `r round(subset(tests, select = "prec_black", test_method == "bper" & test_type == "state_np"), 3)` and Recall is `r round(subset(tests, select = "rec_black", test_method == "bper" & test_type == "state_np"), 3)`. This difference in predictive performance between geographies could be explained by the legacy of Black segregation in at least the North Carolina/Florida sample.
+Figure 3 displays the Precision and Recall scores broken down by ethnorace for the same models used in Figure 2.[^14] For both Whites and Hispanics, Precision and Recall remain high across all models. Using the most input data available (the models on the far right of the figure), White Precision and Recall are `r round(subset(tests, select = "prec_white", test_method == "bper" & test_type == "all"), 3)` and `r round(subset(tests, select = "rec_white", test_method == "bper" & test_type == "all"), 3)`, respectively. Hispanic Precision and Recall in this model are `r round(subset(tests, select = "prec_hispanic", test_method == "bper" & test_type == "all"), 3)` and `r round(subset(tests, select = "rec_hispanic", test_method == "bper" & test_type == "all"), 3)`, respectively. Hispanic predictive performance across all models likely remains high due to the distinctiveness of Spanish surnames. These metrics are uniformly lower for Asians---likely reflecting the relative rarity of Asian individuals in the sample and the heterogeneous qualities of this particular group.[^15] When using Census blocks as the unit of geography, predictions for African Americans are quite strong (Precision: `r round(subset(tests, select = "prec_black", test_method == "bper" & test_type == "all"), 3)`, Recall: `r round(subset(tests, select = "rec_black", test_method == "bper" & test_type == "all"), 3)`). But predictive performance falls with broader geolocations. At the state level, without party ID, Black Precision is `r round(subset(tests, select = "prec_black", test_method == "bper" & test_type == "state_np"), 3)` and Recall is `r round(subset(tests, select = "rec_black", test_method == "bper" & test_type == "state_np"), 3)`. This difference in predictive performance between geographies could be explained by the legacy of Black segregation in at least the North Carolina/Florida sample.
 
 [^14]: The model names are abbreviated by the level of geography, and all use first name and last name inputs. Models with *(np)* do not use the party ID inputs.
 
-```{r}
-# metrics_wru <- tests %>% 
-#   filter(test_method == "wru") %>% 
-#   select(test_type, contains(c("prec", "rec"))) %>% 
-#   pivot_longer(cols = contains(c("prec", "rec"))) %>% 
-#   separate(name, c("Metric", "Race"), sep = "_") %>% 
-#   filter(Race != "other") %>% 
-#   mutate(Metric = case_when(Metric == "prec" ~ "Precision",
-#                             Metric == "rec" ~ "Recall"),
-#          Race = case_when(Race == "api" ~ "Asian",
-#                           Race == "black" ~ "Black",
-#                           Race == "hispanic" ~ "Hispanic",
-#                           Race == "white" ~ "White"))
-# 
-# ggplot(metrics_wru, aes(x = test_type, y = value, group = Metric)) +
-#   geom_line(aes(color = Metric)) +
-#   geom_point(aes(color = Metric), size = 1.5) +
-#   theme_minimal() +
-#   labs(x = "", y = "Score") +
-#   scale_color_manual(values = c("gold", "paleturquoise4")) +
-#   scale_x_discrete(name = "", limits = c("all", "all_np","place", "place_np", "county", "county_np"),
-#                    labels = c(
-#                      "all" = "Block", 
-#                      "place" = "Place", 
-#                      "county" = "County ", 
-#                      "all_np" = "Block (np)", 
-#                      "place_np" = "Place (np)", 
-#                      "county_np" = "County (np)",
-#                      "zip" = "ZIP",
-#                      "zip_np" = "ZIP (np)",
-#                      "state" = "State",
-#                      "state_np" = "State (np)"
-#                    )) +
-#   facet_wrap(~ Race) +
-#   theme(text = element_text(family = "serif"), axis.text.x = element_text(size = 7, angle = 60))
-```
+[^15]: I investigated which ethnoraces Asian Americans were wrongly predicted to be and found a wide spread: 65% White, 18% Hispanic, 14% Black, 1% Other
 
-The classification metrics detailed above provide some information about the predictive shortcomings of my method. These limitations notwithstanding, however, the ethnorace predictions made by `bper` are nearly uniformly better than those from `wru`. Figure 4 displays the difference in Accuracy between `bper` and `wru` using the same input data discussed previously.[^15] The baseline of zero in the figure represents the Accuracy scores from each model using `wru`, and the height of the bars display the change in Accuracy using `bper`. Across all model types, `bper` scores roughly between 1.7 and 4.3 percentage points higher on this metric. Regardless of input data, `bper` classifies a higher proportion of individuals correctly in the North Carolina/Florida voter file.
+The classification metrics detailed above provide some information about the predictive shortcomings of my method. These limitations notwithstanding, however, the ethnorace predictions made by `bper` are nearly uniformly better than those from `wru` [@imai2016]. Figure 4 displays the difference in Accuracy between `bper` and `wru` using the same input data discussed previously.[^16] The baseline of zero in the figure represents the Accuracy scores from each model using `wru`, and the height of the bars display the change in Accuracy using `bper`. Across all model types, `bper` scores between 1.8 and 4.6 percentage points higher on this metric. Regardless of input data, `bper` classifies a higher proportion of individuals correctly in the North Carolina/Florida voter file.
 
-[^15]: The `wru` package does not provide ZIP code or state level predictions so those models are excluded from the comparison.
+[^16]: The `wru` package does not provide ZIP code or state level predictions so those models are excluded from the comparison.
 
 ```{r, fig.cap="Accuracy Score Comparison to `wru`"}
 plot_tests <- tests %>% 
@@ -330,7 +298,7 @@ accuracy <- plot_tests %>%
 
 
 ggplot(accuracy, aes(x = test_type, y = diff)) +
-  geom_bar(stat = "identity", fill = "gray50") +
+  geom_bar(stat = "identity", fill = wes_palette("Moonrise2", n = 1)) +
   theme_minimal() + 
   labs(y = "Difference in Accuracy", x = "") +
   scale_x_discrete(name = "Model Inputs", limits = rev(c("all", "all_np", "place", "place_np", "county", "county_np")),
@@ -344,45 +312,29 @@ ggplot(accuracy, aes(x = test_type, y = diff)) +
   theme(text = element_text(family = "serif"))
 ```
 
-Figures 5 through 8 show the same comparisons between `wru` and `bper` for Precision and Recall across different ethnoraces. For Asians in Figure 4, the comparisons shows absolute gains for `bper` in both metrics at block-level geographies. However, when using more aggregate geographies there is some loss to Recall. The large gains in Precision for Asians should generally compensate for these concerns, but this may depend on the particular substantive application of the method.
+Figures 5 through 8 show the same comparisons between `wru` and `bper` for Precision and Recall across different ethnoraces. For Asians in Figure 5, the comparison strongly favors `bper`. Across almost all sources of input data, `bper` out-performs `wru` in terms of both Precision and Recall. In particular, using block geolocations leads to between a 10 and 12 percentage point increase in Recall. A greater proportion of self-identified Asian individuals are correctly classified. Using county geolocations along with party ID (the model second from the left) we see a very slight decrease in Precision, but this is compensated for a 5 percentage point increase in Recall under these conditions.
 
 ```{r, fig.cap="Precision and Recall Score Comparison to `wru`: Asian"}
-api <- plot_tests %>% 
+api_data <- plot_tests %>% 
   select(test_method, test_type, prec_api, rec_api) %>% 
-  group_by(test_type) %>% 
-  summarise(prec_diff = last(prec_api) - first(prec_api), prec_bper = last(prec_api),
-            rec_diff = last(rec_api) - first(rec_api), rec_bper = last(rec_api)) %>% 
-  ungroup() %>% 
-  mutate(prec_color = if_else(prec_diff < 0, "gray20", "gray50"),
-         rec_color = if_else(rec_diff < 0, "gray20", "gray50"))
+  pivot_longer(cols = c("prec_api", "rec_api"), names_to = "metric") %>% 
+  group_by(test_type, metric) %>% 
+  summarise(diff = last(value) - first(value)) %>% 
+  mutate(test_type = factor(test_type,
+                            level = c("county_np", "county", "place_np", "place",
+                                      "all_np", "all")),
+         metric = case_when(metric == "prec_api" ~ "Precision",
+                            metric == "rec_api" ~ "Recall"),
+         pos = diff >= 0) 
 
-prec_api <-
-  ggplot(api, aes(x = test_type, y = prec_diff, fill = prec_color)) +
+api_data %>% 
+  ggplot(aes(x = test_type, y = diff, fill = pos)) +
   geom_bar(stat = "identity") +
-  scale_fill_identity(guide = F) +
-  theme_minimal() + 
-  ylim(0, 0.145) +
-  labs(y = "Difference in Precision", x = "", title = "") +
-  scale_x_discrete(name = "", limits = rev(c("all", "all_np", "place", "place_np", "county", "county_np")),
-                   labels = rev(c(
-                     "all" = "", 
-                     "place" = "", 
-                     "county" = "", 
-                     "all_np" = "", 
-                     "place_np" = "", 
-                     "county_np" = ""))
-                   ) +
-  theme(text = element_text(family = "serif"))
-
-rec_api <-
- ggplot(api, aes(x = test_type, y = rec_diff, fill = rec_color)) +
-  geom_bar(stat = "identity") +
-  scale_fill_identity(guide = F) +
-  theme_minimal() + 
-  ylim(-0.14, 0.05) +
-  labs(y = "Difference in Recall", x = "") +
-  scale_x_discrete(name = "Model Inputs", limits = rev(c("all", "all_np", "place", "place_np", "county", "county_np")),
-                   labels = rev(c(
+  facet_wrap(~ metric, nrow = 2) +
+  scale_fill_manual(values = rev(wes_palette("Moonrise2", n = 2)), guide = F) + 
+  theme_minimal() +
+  labs(x = "Model Inputs", y = "Difference from wru") +
+  scale_x_discrete(labels = rev(c(
                      "all" = "Block \n Multi-Unit \n Party ID \n First Name \n Last Name", 
                      "place" = "Place \n Party ID \n First Name \n Last Name", 
                      "county" = "County \n Party ID \n First Name \n Last Name", 
@@ -390,49 +342,31 @@ rec_api <-
                      "place_np" = "Place \n First Name \n Last Name", 
                      "county_np" = "County \n First Name \n Last Name"))) +
   theme(text = element_text(family = "serif"))
-
-grid.arrange(prec_api, rec_api, nrow = 2)
 ```
 
-The comparison among predictions for Black individuals in Figure 6 are striking. My method shows dramatic gains in Precision for all models while also modestly increasing Recall. Without party ID, `bper` improves upon `wru` by nearly 30 percentage points in Precision using place or county geolocations. This means that individuals predicted to be Black by `bper` are nearly 30 percentage points more likely to self-identify as Black relative to the predictions generated by `wru`. The modest gains in Recall across all models signifies that `bper` is correctly predicting a greater share of self-identified African Americans in the sample as well.
+The comparison among predictions for Black individuals in Figure 6 are striking. My method shows dramatic gains in Precision for all models while also modestly increasing Recall. Without party ID, `bper` improves upon `wru` by over 25 percentage points in Precision using place or county geolocations. This means that individuals predicted to be Black by `bper` are over 25 percentage points more likely to self-identify as Black relative to the predictions generated by `wru`. The modest gains in Recall across all models signifies that `bper` is correctly predicting a greater share of self-identified African Americans in the sample as well.
 
 ```{r, fig.cap="Precision and Recall Score Comparison to `wru`: Black"}
-black <- plot_tests %>% 
+black_data <- plot_tests %>% 
   select(test_method, test_type, prec_black, rec_black) %>% 
-  group_by(test_type) %>% 
-  summarise(prec_diff = last(prec_black) - first(prec_black), prec_bper = last(prec_black),
-            rec_diff = last(rec_black) - first(rec_black), rec_bper = last(rec_black)) %>% 
-  ungroup() %>% 
-  mutate(prec_color = if_else(prec_diff < 0, "gray20", "gray50"),
-         rec_color = if_else(rec_diff < 0, "gray20", "gray50"))
+  pivot_longer(cols = c("prec_black", "rec_black"), names_to = "metric") %>% 
+  group_by(test_type, metric) %>% 
+  summarise(diff = last(value) - first(value)) %>% 
+  mutate(test_type = factor(test_type,
+                            level = c("county_np", "county", "place_np", "place",
+                                      "all_np", "all")),
+         metric = case_when(metric == "prec_black" ~ "Precision",
+                            metric == "rec_black" ~ "Recall"),
+         pos = diff >= 0) 
 
-prec_black <-
-  ggplot(black, aes(x = test_type, y = prec_diff, fill = prec_color)) +
+black_data %>% 
+  ggplot(aes(x = test_type, y = diff, fill = pos)) +
   geom_bar(stat = "identity") +
-  scale_fill_identity(guide = F) +
-  theme_minimal() + 
-  ylim(0, 0.3) +
-  labs(y = "Difference in Precision", x = "", title = "") +
-  scale_x_discrete(name = "", limits = rev(c("all", "all_np", "place", "place_np", "county", "county_np")),
-                   labels = rev(c(
-                     "all" = "", 
-                     "place" = "", 
-                     "county" = "", 
-                     "all_np" = "", 
-                     "place_np" = "", 
-                     "county_np" = ""))
-                   ) +
-  theme(text = element_text(family = "serif"))
-
-rec_black <-
- ggplot(black, aes(x = test_type, y = rec_diff, fill = rec_color)) +
-  geom_bar(stat = "identity") +
-  scale_fill_identity(guide = F) +
-  theme_minimal() + 
-  ylim(-0.3, 0.05) +
-  labs(y = "Difference in Recall", x = "") +
-  scale_x_discrete(name = "Model Inputs", limits = rev(c("all", "all_np", "place", "place_np", "county", "county_np")),
-                   labels = rev(c(
+  facet_wrap(~ metric, nrow = 2) +
+  scale_fill_manual(values = wes_palette("Moonrise2", n = 2), guide = F) + 
+  theme_minimal() +
+  labs(x = "Model Inputs", y = "Difference from wru") +
+  scale_x_discrete(labels = rev(c(
                      "all" = "Block \n Multi-Unit \n Party ID \n First Name \n Last Name", 
                      "place" = "Place \n Party ID \n First Name \n Last Name", 
                      "county" = "County \n Party ID \n First Name \n Last Name", 
@@ -440,49 +374,29 @@ rec_black <-
                      "place_np" = "Place \n First Name \n Last Name", 
                      "county_np" = "County \n First Name \n Last Name"))) +
   theme(text = element_text(family = "serif"))
-
-grid.arrange(prec_black, rec_black, nrow = 2)
 ```
 
 Figure 7 shows the comparison in predictions among Hispanics. Again, here `bper` out-performs `wru` in both Precision and Recall for every model. The magnitudes of these differences, however, are smaller than those for Black or Asian predictions. This is likely due to distinct Spanish last names, which already provide a lot of predictive information for Hispanics. Therefore, the additional predictive improvements in `bper`, such as first name information and smoothing, have less to contribute.
 
 ```{r, fig.cap="Precision and Recall Score Comparison to `wru`: Hispanic"}
-hispanic <- plot_tests %>% 
+plot_tests %>% 
   select(test_method, test_type, prec_hispanic, rec_hispanic) %>% 
-  group_by(test_type) %>% 
-  summarise(prec_diff = last(prec_hispanic) - first(prec_hispanic), prec_bper = last(prec_hispanic),
-            rec_diff = last(rec_hispanic) - first(rec_hispanic), rec_bper = last(rec_hispanic)) %>% 
-  ungroup() %>% 
-  mutate(prec_color = if_else(prec_diff < 0, "gray20", "gray50"),
-         rec_color = if_else(rec_diff < 0, "gray20", "gray50"))
-
-prec_hispanic <-
-  ggplot(hispanic, aes(x = test_type, y = prec_diff, fill = prec_color)) +
+  pivot_longer(cols = c("prec_hispanic", "rec_hispanic"), names_to = "metric") %>% 
+  group_by(test_type, metric) %>% 
+  summarise(diff = last(value) - first(value)) %>% 
+  mutate(test_type = factor(test_type,
+                            level = c("county_np", "county", "place_np", "place",
+                                      "all_np", "all")),
+         metric = case_when(metric == "prec_hispanic" ~ "Precision",
+                            metric == "rec_hispanic" ~ "Recall"),
+         pos = diff >= 0) %>% 
+  ggplot(aes(x = test_type, y = diff, fill = pos)) +
   geom_bar(stat = "identity") +
-  scale_fill_identity(guide = F) +
-  theme_minimal() + 
-  ylim(0, 0.04) +
-  labs(y = "Difference in Precision", x = "", title = "") +
-  scale_x_discrete(name = "", limits = rev(c("all", "all_np", "place", "place_np", "county", "county_np")),
-                   labels = rev(c(
-                     "all" = "", 
-                     "place" = "", 
-                     "county" = "", 
-                     "all_np" = "", 
-                     "place_np" = "", 
-                     "county_np" = ""))
-                   ) +
-  theme(text = element_text(family = "serif"))
-
-rec_hispanic <-
- ggplot(hispanic, aes(x = test_type, y = rec_diff, fill = rec_color)) +
-  geom_bar(stat = "identity") +
-  scale_fill_identity(guide = F) +
-  theme_minimal() + 
-  ylim(0, 0.04) +
-  labs(y = "Difference in Recall", x = "") +
-  scale_x_discrete(name = "Model Inputs", limits = rev(c("all", "all_np", "place", "place_np", "county", "county_np")),
-                   labels = rev(c(
+  facet_wrap(~ metric, nrow = 2) +
+  scale_fill_manual(values = wes_palette("Moonrise2", n = 2), guide = F) + 
+  theme_minimal() +
+  labs(x = "Model Inputs", y = "Difference from wru") +
+  scale_x_discrete(labels = rev(c(
                      "all" = "Block \n Multi-Unit \n Party ID \n First Name \n Last Name", 
                      "place" = "Place \n Party ID \n First Name \n Last Name", 
                      "county" = "County \n Party ID \n First Name \n Last Name", 
@@ -490,49 +404,29 @@ rec_hispanic <-
                      "place_np" = "Place \n First Name \n Last Name", 
                      "county_np" = "County \n First Name \n Last Name"))) +
   theme(text = element_text(family = "serif"))
-
-grid.arrange(prec_hispanic, rec_hispanic, nrow = 2)
 ```
 
 Lastly, Figure 8 displays the results for the White predictions. In all models except county and place geolocations (without party ID), `bper` out-performs `wru` on both Precision and Recall for White individuals. In the two exceptions, however, losses to Precision are compensated with gains in Recall. This means that, while `bper` is doing a better job classifying a higher proportion of Whites, it is mis-classifying more non-Whites as White compared to `wru` for county and place geolocations without party ID.
 
 ```{r, fig.cap="Precision and Recall Score Comparison to `wru`: White"}
-white <- plot_tests %>% 
+plot_tests %>% 
   select(test_method, test_type, prec_white, rec_white) %>% 
-  group_by(test_type) %>% 
-  summarise(prec_diff = last(prec_white) - first(prec_white), prec_bper = last(prec_white),
-            rec_diff = last(rec_white) - first(rec_white), rec_bper = last(rec_white)) %>% 
-  ungroup() %>% 
-  mutate(prec_color = if_else(prec_diff < 0, "gray20", "gray50"),
-         rec_color = if_else(rec_diff < 0, "gray20", "gray50"))
-
-prec_white <-
-  ggplot(white, aes(x = test_type, y = prec_diff, fill = prec_color)) +
+  pivot_longer(cols = c("prec_white", "rec_white"), names_to = "metric") %>% 
+  group_by(test_type, metric) %>% 
+  summarise(diff = last(value) - first(value)) %>% 
+  mutate(test_type = factor(test_type,
+                            level = c("county_np", "county", "place_np", "place",
+                                      "all_np", "all")),
+         metric = case_when(metric == "prec_white" ~ "Precision",
+                            metric == "rec_white" ~ "Recall"),
+         pos = diff >= 0) %>% 
+  ggplot(aes(x = test_type, y = diff, fill = pos)) +
   geom_bar(stat = "identity") +
-  scale_fill_identity(guide = F) +
-  theme_minimal() + 
-  ylim(-0.06, 0.02) +
-  labs(y = "Difference in Precision", x = "", title = "") +
-  scale_x_discrete(name = "", limits = rev(c("all", "all_np", "place", "place_np", "county", "county_np")),
-                   labels = rev(c(
-                     "all" = "", 
-                     "place" = "", 
-                     "county" = "", 
-                     "all_np" = "", 
-                     "place_np" = "", 
-                     "county_np" = ""))
-                   ) +
-  theme(text = element_text(family = "serif"))
-
-rec_white <-
- ggplot(white, aes(x = test_type, y = rec_diff, fill = rec_color)) +
-  geom_bar(stat = "identity") +
-  scale_fill_identity(guide = F) +
-  theme_minimal() + 
-  ylim(0, 0.08) +
-  labs(y = "Difference in Recall", x = "") +
-  scale_x_discrete(name = "Model Inputs", limits = rev(c("all", "all_np", "place", "place_np", "county", "county_np")),
-                   labels = rev(c(
+  facet_wrap(~ metric, nrow = 2) +
+  scale_fill_manual(values = rev(wes_palette("Moonrise2", n = 2)), guide = F) + 
+  theme_minimal() +
+  labs(x = "Model Inputs", y = "Difference from wru") +
+  scale_x_discrete(labels = rev(c(
                      "all" = "Block \n Multi-Unit \n Party ID \n First Name \n Last Name", 
                      "place" = "Place \n Party ID \n First Name \n Last Name", 
                      "county" = "County \n Party ID \n First Name \n Last Name", 
@@ -540,15 +434,13 @@ rec_white <-
                      "place_np" = "Place \n First Name \n Last Name", 
                      "county_np" = "County \n First Name \n Last Name"))) +
   theme(text = element_text(family = "serif"))
-
-grid.arrange(prec_white, rec_white, nrow = 2)
 ```
 
-In sum, when use block-level geography (with or without party ID), `bper` outperforms `wru` on both Precision and Recall for each group. When we transition to more aggregate geographies, `bper` shows dramatic gains in Precision for Asians and African Americans. Without party ID, there is some loss to Precision for Whites in aggregate geographies, but gains in Recall are more than triple the magnitude for these models.
+In sum, across almost all models of varying input data `bper` outperforms `wru` on both Precision and Recall for each group. When we transition to more aggregate geographies, `bper` shows dramatic gains in Precision for Asians and African Americans. Without party ID, there is some loss to Precision for Whites in aggregate geographies, but gains in Recall are more than triple the magnitude for these models.
 
 # Replication Study
 
-In "Race and Representation in Campaign Fiance" (2020), Jacob Grumbach and Alexander Sahn investigate racial inequality in campaign contributions. Descriptively, they find that Latinos and African Americans are underrepresented among individuals who donate to US House campaigns. They also use differences-in-differences and regression discontinuity analyses to show that when candidates of color run, the contributor class becomes more ethnoracially representative.
+In "Race and Representation in Campaign Fiance" (2020), Jacob Grumbach and Alexander Sahn investigate racial inequality in campaign contributions. Descriptively, they find that Latinos and African Americans are underrepresented among individuals who donate to US House campaigns. They also use differences-in-differences and regression discontinuity analyses to show that when candidates of color run, the contributor class becomes more ethnoracially representative because these candidates garner more co-ethnic donations.
 
 Grumbach and Sahn rely primarily on the Dataset on Ideology and Money in Elections (DIME) from Bonica (2013). These data contain information---such as first names, last names, genders, addresses (for contributors), and political parties (for recipients)---for both the contributors and recipients of campaign contributions from 1980 to 2014. Crucially, however, the DIME data do not contain individuals' self-reported race or ethnicity. Grumbach and Sahn therefore use `wru` to predict the ethnorace of both contributors and recipients. By replacing the ethnorace predictions used in their study with those from `bper` I am able to demonstrate the substantive implications of switching to more accurate predictions.
 
@@ -558,23 +450,26 @@ sahn_grumbach_figs[[2]] %>%
   geom_col(aes(x = year, y = share, fill = pred_race)) +
   theme_minimal() +
   labs(x = 'Year', y = 'Prop. of Contributions') +
-  scale_fill_grey(labels = c("Asian", "Black", "Hispanic")) +
+  scale_fill_manual(labels = c("Asian", "Black", "Hispanic"),
+                    values = wes_palette("Moonrise2", n = 3)) +
   theme(legend.title = element_blank(), legend.position = "bottom") +
   theme(text = element_text(family = "serif")) +
   facet_wrap(~ method)
 ```
 
-The replication files for their study, however, do not contain the code which implements the ethnorace prediction steps. It has proved impossible to replicate their study exactly, so instead I reproduced their descriptive analysis to the best of my ability using both `wru` and `bper`. The DIME data contain ZIP codes for contributors, so I use that level of geography along with first name, last name, and gender as input data in `bper` for predicting contributor ethnoraces. Candidate data is limited to first names, last names, party ID, and states. For the `wru` predictions I use last names and counties for contributors because `wru` does not allow for ZIP code geographies. And for candidate `wru` predictions I use last names and party ID. In their original paper, Grumbach and Sahn appear to erroneously match candidates to counties from which their donors reside. There is no guarantee that candidates and donors reside in the same county. Furthermore, because the DIME data is at the level of individual contribution, this procedure classifies candidates as potentially belonging to different ethnoraces over time. For example, Rep. Jim Bacchus appears in Grumbach and Sahn's replication data as "Black", "White", and "Other" in various cycles. Roughly 1,360 candidates have multiple predicted ethnoraces in their data but these errors are obscured in subsequent aggregation procedures. For this reason I calculate my own ethnorace probabilities with `wru` here.
+The replication files for their study, however, do not contain the code which implements the ethnorace prediction steps. It has proved impossible to replicate their study exactly, so instead I reproduced their descriptive analysis to the best of my ability using both `wru` and `bper`. The DIME data contain ZIP codes for contributors, so I use that level of geography along with first name, last name, and gender as input data in `bper` for predicting contributor ethnoraces. Candidate data is limited to first names, last names, party ID, and states. For the `wru` predictions I use last names and counties for contributors because `wru` does not allow for ZIP code geographies. And for candidate `wru` predictions I use last names and party ID.
 
-Figure 9 (Figure 2 in Grumbach and Sahn 2020) shows the proportion of total campaign contributions by ethnorace by year.[^16] The left-hand panel shows these results using `wru`'s predictions and matches closely the figure from the published article. Compared to `wru`, the results from `bper` show substantially larger shares of contributions from individuals of color. Additionally, there appears to be a dramatic decline over time in contributions from African Americans using `bper` predictions. African Americans accounted for 12% of the contributions in 1980 compared to only 5% in 2014. This pattern exists, but is less clear in the `wru` panel (6% in 1980 to 4% in 2014). Switching to `bper` predictions thereby reveals a contributor class which is more diverse than the one described by Grumbach and Sahn. However, the `bper` predictions show a worrying decline in this diversity---the explanation for which could be the subject of future research.
+In their original paper, Grumbach and Sahn appear to match candidates to counties from which their donors reside during their race prediction coding. There is no guarantee, however, that candidates and donors reside in the same county---or that county demographics of donors match those of the candidates. Furthermore, because the DIME data is at the level of individual contribution, this procedure classifies candidates as potentially belonging to different ethnoraces over time. For example, Rep. Jim Bacchus appears in Grumbach and Sahn's replication data as Black, White, and Other in various cycles. Roughly 1,360 candidates have multiple predicted ethnoraces in their data but these errors are obscured in subsequent aggregation procedures. For this reason I calculate my own ethnorace probabilities with `wru` separately for this replication study. However, this means that the results I report using `wru` differ slightly from those reported in the published article.
 
-[^16]: Contributions from Whites are omitted to display Asian, Black, and Hispanic contributions better.
+Figure 9 (Figure 2 in Grumbach and Sahn 2020) shows the proportion of total campaign contributions by ethnorace by year.[^17] The left-hand panel shows these results using `wru`'s predictions and matches closely the figure from the published article. Compared to `wru`, the results from `bper` show substantially larger shares of contributions from individuals of color. Additionally, there appears to be a dramatic decline over time in contributions from African Americans using `bper` predictions. African Americans accounted for 12% of the contributions in 1980 compared to only 5% in 2014. This pattern exists, but is less clear in the `wru` panel (6% Black contributions in 1980 compared to 4% in 2014). Switching to `bper` predictions thereby reveals a contributor class which is more diverse than the one described by Grumbach and Sahn. However, the `bper` predictions show a worrying decline in this diversity---the explanation for which could be the subject of future research.
+
+[^17]: As in the original figure, contributions from Whites are omitted to display Asian, Black, and Hispanic contributions better.
 
 ```{r, fig.cap="Ethnoracial Composition of the Contributor Class Versus Electorate"}
 sahn_grumbach_figs[[3]] %>%
   ggplot(aes(x = race, fill = race, y = share)) +
   geom_bar(stat = "identity") +
-  scale_fill_grey() +
+  scale_fill_manual(values = wes_palette("Moonrise2", n = 3)) +
   scale_y_continuous(breaks = c(0, .05, .1)) +
   guides(fill = F) +
   labs(x = "", y = "Proportion") +
@@ -583,7 +478,7 @@ sahn_grumbach_figs[[3]] %>%
   theme(text = element_text(family = "serif"))
 ```
 
-Whereas Figure 9 showed the proportions of *contributions* by ethnorace, Figure 10 (Figure 3 in Grumbach and Sahn 2020) displays the proportions of *contributors* by ethnorace relative to other forms of political participation. Both `wru` and `bper` predictions show that Black and Hispanic Americans are underrepresented in the contributor class. This finding, along with the increased representation of Asian Americans, replicates Grumbach and Sahn's descriptive analysis from their study. Like the time trends from Figure 9, however, `bper` predictions show higher shares of non-White contributors compared to the predictions from `wru`. The substantial increase in Asian American representation among contributors, relative to registered voters and members of Congress, suggests directions for future research investigating alternative methods of political participation.
+Whereas Figure 9 showed the proportions of *contributions* by ethnorace, Figure 10 (Figure 3 in original) displays the proportions of *contributors* by ethnorace relative to other forms of political participation. Both `wru` and `bper` predictions show that Black and Hispanic Americans are underrepresented in the contributor class. This finding, along with the increased representation of Asian Americans relative to their proportion among registered voters, replicates Grumbach and Sahn's descriptive analysis from the published article. However, `bper` predictions show a substantially higher share of Black contributors compared to the predictions from `wru`. We would need to disaggregate these results by election cycle to make a comparison to Figure 9, but it appears that African Americans may be more likely to contribute relative to Asian and Hispanic Americans, but make smaller average contributions.
 
 ```{r, fig.cap="Average Total Contributions by Ethnorace"}
 sahn_grumbach_figs[[4]] %>%
@@ -597,11 +492,11 @@ sahn_grumbach_figs[[4]] %>%
                                pred_race == "white" ~ "White")) %>% 
   ggplot(aes(x = r_pred_race, y = avg_amount, fill = method)) +
   geom_bar(stat = "identity") +
-  scale_fill_grey() +
-  labs(x = "Contributor Ethnorace",
+  scale_fill_manual(values = wes_palette("Moonrise2", n = 2)) +
+  labs(x = "Candidate Ethnorace",
        y = "Average Contributions (Total $)",
        fill = "Method",
-       title = "Candidate Ethnorace") +
+       title = "Contributor Ethnorace") +
   theme_minimal() +
   facet_grid(method ~ pred_race)  +
   theme(text = element_text(family = "serif"),
@@ -609,9 +504,13 @@ sahn_grumbach_figs[[4]] %>%
         plot.title = element_text(hjust = 0.5, size = 11))
 ```
 
-Figure 11 (Figure 4 in original) uses both the ethnorace of contributors (x-axis) and the ethnorace of candidates (columns). It displays the average total contributions candidates receive from contributors of a given ethnorace. Similar to the original study, I find strong evidence of co-ethnic contributing. Asian and Hispanic candidates receive a majority of their contributions from co-ethnic donors, and Black and White candidates receive a plurality of their contributions from co-ethnics. This descriptive finding forms the basis for the subsequent causal analysis Grumbach and Sahn pursue. The `bper` predictions here appear to provide stronger evidence for their theory than those from `wru`. The top row of Figure 11 shows somewhat starker differences between donations from co-ethnics versus other ethnoraces.
+Figure 11 (Figure 4 in original) uses both the ethnorace of contributors (columns) and the ethnorace of candidates (x-axis). It displays the average total contributions candidates receive from contributors of a given ethnorace. Similar to the original study, I find strong evidence of co-ethnic contributing. Among each ethnorace's contributors, either a plurality or a majority of contributions go to candidates who share the same ethnorace. This finding is supported more by the `bper` predictions than the `wru` predictions. Contributions from Black donors appear to be more heavily concentrated among Black candidates when using `bper`. The same pattern of increased co-ethnic concentration appears for Hispanic contributors and candidates. The descriptive findings from Figure 11 form the inspiration for the subsequent causal analysis Grumbach and Sahn pursue in their study. Given some of the patterns of increased co-ethnic contributing from the `bper` predictions, therefore, we may expect to see stronger effects in replications of their differences-in-differences and regression discontinuity results.[^18]
+
+[^18]: These replications could not be completed in time for the current draft.
 
 # Conclusion
+
+This paper describes a powerful method for predicting individuals' race or ethnicity based on other known attributes. Through validation tests, I have shown that my method produces better predictions than those used in recent social science research. These improvements are not trivial. If researchers only have access to individuals' name and county or place, my method nearly doubles the probability that someone predicted to be Black self-identifies as Black relative to predictions generated from other methods [@imai2016]. These improved predictions reveal new empirical findings as demonstrated by my replication of Grumbach and Sahn (2020).
 
 \newpage
 
