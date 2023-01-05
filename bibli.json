@@ -1101,5 +1101,178 @@
         "source": "Zotero",
         "title": "Obtaining calibrated probability estimates from decision trees and naive Bayesian classiﬁers",
         "type": "article-journal"
+    },
+    {
+        "DOI": "10.1017/pan.2021.31",
+        "ISSN": "1047-1987, 1476-4989",
+        "URL": "https://www.cambridge.org/core/product/identifier/S1047198721000310/type/journal_article",
+        "accessed": {
+            "date-parts": []
+        },
+        "author": [
+            {
+                "family": "Clark",
+                "given": "Jesse T."
+            },
+            {
+                "family": "Curiel",
+                "given": "John A."
+            },
+            {
+                "family": "Steelman",
+                "given": "Tyler S."
+            }
+        ],
+        "container-title": "Political Analysis",
+        "container-title-short": "Polit. Anal.",
+        "id": "clark2021",
+        "issued": {
+            "date-parts": [
+                [
+                    2021,
+                    11,
+                    29
+                ]
+            ]
+        },
+        "key": "VAT8JRGH",
+        "language": "en",
+        "libraryid": "1",
+        "page": "1-7",
+        "providerkey": "2509FBBE-5BB0-44C4-B119-6083A81ED673",
+        "source": "DOI.org (Crossref)",
+        "title": "Minmaxing of Bayesian Improved Surname Geocoding and Geography Level Ups in Predicting Race",
+        "type": "article-journal"
+    },
+    {
+        "DOI": "10.1146/annurev-polisci-032015-010015",
+        "ISSN": "1094-2939, 1545-1577",
+        "URL": "http://www.annualreviews.org/doi/10.1146/annurev-polisci-032015-010015",
+        "accessed": {
+            "date-parts": []
+        },
+        "author": [
+            {
+                "family": "Sen",
+                "given": "Maya"
+            },
+            {
+                "family": "Wasow",
+                "given": "Omar"
+            }
+        ],
+        "container-title": "Annual Review of Political Science",
+        "container-title-short": "Annu. Rev. Polit. Sci.",
+        "id": "sen2016",
+        "issue": "1",
+        "issued": {
+            "date-parts": [
+                [
+                    2016,
+                    5,
+                    11
+                ]
+            ]
+        },
+        "key": "V9NZMGEY",
+        "language": "en",
+        "libraryid": "1",
+        "page": "499-522",
+        "providerkey": "Zotero",
+        "source": "DOI.org (Crossref)",
+        "title": "Race as a Bundle of Sticks: Designs that Estimate Effects of Seemingly Immutable Characteristics",
+        "title-short": "Race as a Bundle of Sticks",
+        "type": "article-journal",
+        "volume": "19"
+    },
+    {
+        "DOI": "10.1146/annurev-polisci-060418-042801",
+        "ISSN": "1094-2939, 1545-1577",
+        "URL": "https://www.annualreviews.org/doi/10.1146/annurev-polisci-060418-042801",
+        "accessed": {
+            "date-parts": []
+        },
+        "author": [
+            {
+                "family": "Davenport",
+                "given": "Lauren"
+            }
+        ],
+        "container-title": "Annual Review of Political Science",
+        "container-title-short": "Annu. Rev. Polit. Sci.",
+        "id": "davenport2020",
+        "issue": "1",
+        "issued": {
+            "date-parts": [
+                [
+                    2020,
+                    5,
+                    11
+                ]
+            ]
+        },
+        "key": "3EZ54LUB",
+        "language": "en",
+        "libraryid": "1",
+        "page": "221-240",
+        "providerkey": "Zotero",
+        "source": "DOI.org (Crossref)",
+        "title": "The Fluidity of Racial Classifications",
+        "type": "article-journal",
+        "volume": "23"
+    },
+    {
+        "author": [
+            {
+                "family": "Sanchez",
+                "given": "Gabriel R"
+            }
+        ],
+        "container-title": "Political Research Quarterly",
+        "id": "sanchez2006",
+        "issue": "3",
+        "issued": {
+            "date-parts": [
+                [
+                    2006
+                ]
+            ]
+        },
+        "key": "I4FJQ9HG",
+        "language": "en",
+        "libraryid": "1",
+        "page": "12",
+        "providerkey": "Zotero",
+        "source": "Zotero",
+        "title": "The Role of Group Consciousness in Latino Public Opinion",
+        "type": "article-journal",
+        "volume": "59"
+    },
+    {
+        "author": [
+            {
+                "family": "Masuoka",
+                "given": "Natalie"
+            }
+        ],
+        "container-title": "American Politics Research",
+        "id": "masuoka2008",
+        "issue": "1",
+        "issued": {
+            "date-parts": [
+                [
+                    2008
+                ]
+            ]
+        },
+        "key": "C6M8T4ZT",
+        "language": "en",
+        "libraryid": "1",
+        "page": "29",
+        "providerkey": "Zotero",
+        "source": "Zotero",
+        "title": "Defining the Group",
+        "type": "article-journal",
+        "volume": "36"
     }
 ]
