@@ -1,60 +1,8 @@
 
 
-make_metrics_plot <- function(tests_df, metric, race = "All", inc_party = TRUE, inc_agesex = TRUE, 
-                              inc_urban = "All", inc_income_level = "All", 
-                              inc_foreignborn_level = "All",
-                              inc_college_level = "All") {
-  tests_df <- tests_df %>% 
-    mutate(geography = factor(geography,
-                              levels = c("state", "county", "zip", "place", "tract", "block"),
-                              labels = c("State", "County", "Zip", "Place", "Tract", "Block"))) %>% 
-    filter(party == inc_party,
-           urban == inc_urban, income_level == inc_income_level, 
-           foreignborn_level == inc_foreignborn_level,
-           college_level == inc_college_level)
-  if (inc_agesex == TRUE) {
-    tests_df <- tests_df %>% 
-      filter(age == TRUE, sex == TRUE)
-  } else {
-    tests_df <- tests_df %>% 
-      filter(age == FALSE, sex == FALSE)
-  }
-  
-  if (metric == "Precision/Recall") {
-    tests_df <- tests_df %>% 
-      select(method, geography, paste0("prec_", race), paste0("rec_", race)) %>% 
-      pivot_longer(c(paste0("prec_", race), paste0("rec_", race)), 
-                   names_to = "metric") %>% 
-      mutate(metric = case_when(grepl("prec", metric) ~ "Precision",
-                                grepl("rec", metric) ~ "Recall"))
-  } else if (metric == "Accuracy") {
-    tests_df <- tests_df %>% 
-      rename(value = accuracy)
-  }
-  p <- tests_df %>% 
-    ggplot(aes(x = geography, y = value, color = method)) +
-    geom_point(size = 4, alpha = .8) +
-    labs(y = "", x = "",
-         caption = paste0("Race: ", toupper(race),
-                           "     Party: ", str_to_title(inc_party),
-                           "     Age/Sex: ", str_to_title(inc_agesex), "\n",
-                           "     Urban/Rural: ", inc_urban,
-                           "     Income: ", inc_income_level,
-                           "     Foreign Born: ", inc_foreignborn_level,
-                           "     College: ", inc_college_level)) +
-    theme_minimal() +
-    theme(legend.title = element_blank(), 
-          plot.caption = element_text(size = 10))
-  if (metric == "Precision/Recall") {
-    p <- p +
-      facet_wrap(~ metric, nrow = 2)
-  } else if (metric == "Accuracy") {
-    p <- p +
-      labs(title = "Accuracy") +
-      theme(plot.title = element_text(hjust = .5))
-  }
-  return(p)
-}
+
+
+
 
 make_bper_plot <- function(bper_df, plot_metric) {
   plot_df <- bper_df %>% 

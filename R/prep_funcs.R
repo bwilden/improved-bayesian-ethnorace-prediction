@@ -123,58 +123,68 @@ apply_spatial_merge <- function(voter_file, address_path, state, year) {
   return(geocoded_df)
 }
 
-assemble_states <- function(state_voter_file_list,
-                            state_abbrvs) {
-  acs_dat <- get_acs("tract",
+get_state_census_data <- function(state_abbrvs) {
+  acs_dat <- get_acs(geography = "tract",
                      variables = c("total_pop" = "B01001_001",
-                                   "foreign_born" = "B05002_013",
-                                   "english_less_than_very_well" = "B06007_008",
-                                   "median_income" = "B06011_001",
-                                   "bachelors_degree" = "B06009_005",
-                                   "graduate_degree" = "B06009_006"),
+                                   "foreign_born" = "B05006_001",
+                                   "english_less_than_very_well" = "B16004_003",
+                                   "median_income" = "B19013_001",
+                                   "bachelors_degree" = "B15003_022",
+                                   "median_home_value" = "B25077_001"),
                      output = "wide",
-                     state = state_abbrvs) %>% 
+                     state = state_abbrvs,
+                     year = 2019) %>% 
     mutate(pct_foreignborn = foreign_bornE / total_popE,
            pct_englishpoor = english_less_than_very_wellE / total_popE,
            median_income = median_incomeE,
-           pct_college = (bachelors_degreeE + graduate_degreeE) / total_popE,
-           across(c(pct_foreignborn, pct_englishpoor, median_income, pct_college),
+           median_home_value = median_home_valueE,
+           pct_college = bachelors_degreeE / total_popE,
+           # For some reason I wanted terciles?
+           across(c(pct_foreignborn, pct_englishpoor, median_income, pct_college, median_home_value),
                   ~ cut(., quantile(., probs = c(0, .33, .66, 1), na.rm = TRUE), 
                         labels = c("Low", "Middle", "High")),
                   .names = "{.col}_level"),
            state_code = str_sub(GEOID, 1, 2),
            county = str_sub(GEOID, 3, 5),
            tract = str_sub(GEOID, 6, 11)) %>% 
-    select(contains("level"), state_code, county, tract)
+    select(pct_foreignborn, pct_englishpoor, median_income, median_home_value, pct_college,
+           state_code, county, tract)
+    # select(contains("level"), state_code, county, tract)
   
-  deccenial_dat <- get_decennial("block", "P002002", 
-                             state = state_abbrvs) %>% 
+  decennial_dat <- get_decennial("block", "P002002", 
+                                 state = state_abbrvs) %>% 
     mutate(urban = ifelse(value > 0, 1, 0),
            state_code = str_sub(GEOID, 1, 2),
            county = str_sub(GEOID, 3, 5),
            tract = str_sub(GEOID, 6, 11),
            block = str_sub(GEOID, 12, 15)) %>% 
     select(-c(GEOID, NAME, variable, value))
-
   
-  combined_voter_files <- data.table::rbindlist(state_voter_file_list) %>% 
+  return(lst(acs_dat, decennial_dat))
+}
+
+assemble_states <- function(state_voter_file_list,
+                            state_abbrvs,
+                            acs_dat,
+                            decennial_dat) {
+  combined_voter_files <- list_rbind(state_voter_file_list) %>% 
+    # Get rid of missing races and people in the wrong states
     filter(!(is.na(race)),
            state %in% state_abbrvs) %>% 
     left_join(tidycensus::fips_codes %>% 
                 select(state, state_code) %>% 
                 unique()) %>% 
     mutate(VoterID = as.character(row_number()),
+           # Dummies for calibration plots
            obs_black = factor(ifelse(race == "black", 1, 0), levels = c(1, 0)),
            obs_white = factor(ifelse(race == "white", 1, 0), levels = c(1, 0)),
            obs_hispanic = factor(ifelse(race == "hispanic", 1, 0), levels = c(1, 0)),
            obs_aapi = factor(ifelse(race == "aapi", 1, 0), levels = c(1, 0)),
            obs_aian = factor(ifelse(race == "aian", 1, 0), levels = c(1, 0)),
            obs_other = factor(ifelse(race %in% c("other", "multi"), 1, 0), levels = c(1, 0)),
-           surname = last_name,
-           PID = case_when(party == "UNA" ~ 0,
-                           party == "DEM" ~ 1,
-                           party == "REP" ~ 2)) %>% 
-    left_join(deccenial_dat, by = c("state_code", "county", "tract", "block")) %>% 
+           race = ifelse(race %in% c("aian", "multi"), "other", race)) %>% 
+    # Merge in census demographic data
+    left_join(decennial_dat, by = c("state_code", "county", "tract", "block")) %>% 
     left_join(acs_dat, by = c("state_code", "county", "tract"))
   return(combined_voter_files)
 }

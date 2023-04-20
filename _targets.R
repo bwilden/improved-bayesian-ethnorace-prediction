@@ -1,12 +1,14 @@
 library(targets)
 
-source("R/prep_funcs.R")
-source("R/validation_funcs.R")
-source("R/plot_funcs.R")
-source("R/replication_funcs.R")
-source("R/calibration_funcs.R")
+tar_source(here::here("R", "prep_funcs.R"))
+tar_source(here::here("R", "validation_funcs.R"))
+tar_source(here::here("R", "plot_funcs.R"))
+tar_source(here::here("R", "replication_funcs.R"))
+tar_source(here::here("R", "calibration_funcs.R"))
+
 options(tidyverse.quiet = TRUE)
 set.seed(111)
+
 tar_option_set(packages = c("here",
                             "tidyverse",
                             "sf",
@@ -20,14 +22,15 @@ tar_option_set(packages = c("here",
 suppressWarnings(library(tidyverse))
 
 list(
+  # Prep NC/Florida files
   tar_target(
     raw_nc_voter_file,
-    here("bper", "data-raw", "north_carolina", "VR_Snapshot_20190101_fix.txt"),
+    here("data-raw", "north_carolina", "VR_Snapshot_20190101_fix.txt"),
     format = "file"
   ),
   tar_target(
     raw_florida_voter_file,
-    list.files(path = here("bper", "data-raw", "florida", "20190212_VoterDetail"), 
+    list.files(path = here("data-raw", "florida", "20190212_VoterDetail"), 
                pattern = "*.txt", full.names = TRUE),
     format = "file"
   ),
@@ -47,13 +50,13 @@ list(
   ),
   tar_target(
     florida_addresses,
-    list.files(path = here("bper", "data-raw", "florida"),
+    list.files(path = here("data-raw", "florida"),
                pattern = "*Geocoded.csv", full.names = TRUE),
     format = "file"
   ),
   tar_target(
     nc_addresses,
-    here("bper", "data-raw", "north_carolina", "nc_20190101_address_Geocoded.csv"),
+    here("data-raw", "north_carolina", "nc_20190101_address_Geocoded.csv"),
     format = "file"
   ),
   tar_target(
@@ -69,77 +72,43 @@ list(
                         "north_carolina", 2019)
   ),
   tar_target(
+    state_census_data,
+    get_state_census_data(c("NC", "FL"))
+  ),
+  tar_target(
     combined_voter_file,
     assemble_states(list(geocoded_florida_voter_file,
                          geocoded_nc_voter_file),
-                    c("NC", "FL"))
+                    c("NC", "FL"),
+                    acs_dat = state_census_data$acs_dat,
+                    decennial = state_census_data$decennial)
   ),
-  tar_target(
-    wru_data,
-    load_wru_data(c("NC", "FL"))
-  ),
+  
+  # BISG tests
   tar_target(
     bper_data,
     bper::load_bper_data(combined_voter_file, year = 2019)
   ),
   tar_target(
-    wru_tests,
-    run_validation_tests(wru = TRUE,
-                         df = combined_voter_file %>% 
-                           sample_n(1e7),
-                         wru_data = wru_data)
-  ),
-  tar_target(
     bper_tests,
-    run_validation_tests(wru = FALSE,
-                         df = combined_voter_file %>% 
-                           sample_n(1e7),
-                         bper_data = bper_data)
-  ),
-  tar_target(
-    validation_results,
-    calc_validation_results(bper_tests,
-                            wru_tests)
-  ),
-  tar_target(
-    comparison_plots,
-    make_all_comparison_plots(validation_results$comparison_df)
-  ),
-  tar_target(
-    bper_plots,
-    make_all_bper_plots(validation_results$bper_df)
-  ),
-  tar_target(
-    calibration_data,
-    build_calibration_data(combined_voter_file,
-                           wru_data = wru_data,
-                           bper_data = bper_data)
-  ),
-  tar_target(
-    brier_table,
-    create_brier_table(calibration_data)
-  ),
-  tar_target(
-    calibration_plot_data,
-    map_dfr(c("aapi", "black", "hispanic", "white"),
-            create_calibration_plot_data,
-            calibration_data = calibration_data)
-  ),
-  tar_target(
-    calibration_plots,
-    make_calibration_plots(calibration_plot_data)
+    pmap(.l = set_bisg_args(),
+         .f = classify_and_report,
+         bper_data = bper_data,
+         df = combined_voter_file |> 
+           slice_sample(n = 2e5),
+         .progress = TRUE)
   ),
   
   # Grumbach Sahn Replication
   tar_target(
     raw_dime_contribs,
-    list.files(path = here("bper", "data-raw", "dime"), pattern = "contribDB_*",
+    list.files(path = here("data-raw", "dime"), pattern = "contribDB_*",
                full.names = TRUE),
     format = "file"
   ),
   tar_target(
     raw_dime_recips,
-    here("bper", "data-raw", "dime", "dime_recipients_all_1979_2014.csv"),
+    here("data-raw", "dime", "dime_recipients_all_1979_2014.csv"),
     format = "file"
   ),
   tar_target(
