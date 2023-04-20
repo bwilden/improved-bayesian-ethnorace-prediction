@@ -1,0 +1,52 @@
+---
+title: "Practical Guide to BISG"
+author: "Bertrand Wilden"
+date: "`r Sys.Date()`"
+format:
+  pdf:
+    documentclass: article
+    number-sections: true
+    geometry: 
+      - left=25mm
+      - right=25mm
+    indent: true
+    fontsize: 11pt
+    linestretch: 2
+    fig-cap-location: top
+    include-in-header:
+      text:
+        \usepackage{amsmath}
+bibliography: [references.bib, packages.bib]
+nocite : |
+  @R-dplyr, @R-ggdist, @R-ggplot2, @R-MetBrewer, @R-patchwork, @R-targets,  @R-here, @R-purrr, @R-readr
+execute: 
+  echo: false
+  message: false
+  warning: false
+---
+
+```{r}
+library(targets)
+library(dplyr)
+library(ggplot2)
+library(ggdist)
+library(MetBrewer)
+
+knitr::write_bib(.packages(), "packages.bib")
+```
+
+# Overview
+
+# Asian
+
+# Black
+
+# Hispanic
+
+# White
+
+# AIAN / Other
+
+# Voting Sensitivity Simulation Study
+
+# References
