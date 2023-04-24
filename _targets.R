@@ -108,6 +108,23 @@ list(
         make_metric_plot,
         metric_df = bper_metrics)
   ),
+  tar_target(
+    bper_cal,
+    bper::impute_ethnorace(combined_voter_file |>  
+                             slice_sample(n = 1e5), 
+                             year = 2019,
+                             bper_data = bper_data)
+  ),
+  tar_target(
+    bper_cal_data,
+    map_dfr(c("aapi", "black", "hispanic", "white"),
+           create_calibration_plot_data,
+           bper_cal = bper_cal)
+  ),
+  tar_target(
+    bper_cal_plot,
+    make_calibration_plots(bper_cal_data)
+  ),
   
   # Grumbach Sahn Replication
   tar_target(

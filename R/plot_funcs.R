@@ -32,17 +32,13 @@ make_calibration_plots <- function(cal_plot_data) {
   p <- cal_plot_data %>% 
     mutate(race = case_when(race == "aapi" ~ "Asian",
                             TRUE ~ str_to_title(race))) %>% 
-    ggplot(aes(x = midpoint, y = Percent, color = method)) +
+    ggplot(aes(x = midpoint, y = Percent)) +
     geom_line() +
-    geom_point(size = 2) +
+    geom_pointrange(aes(ymin = Lower, ymax = Upper)) +
     geom_abline(slope = 1, intercept = 0, linetype = "dashed", size = .25) +
-    scale_color_manual(values = rev(met.brewer("Isfahan1", 2))) +
     xlim(0, 100) +
     ylim(0, 100) +
-    theme_minimal() +
     labs(y = "Observed Percent", x = "Predicted Probability Bin Midpoint") +
-    facet_grid(method ~ race) +
-    theme(legend.position = "none",
-          text = element_text(family = "serif"))
+    facet_wrap(~ race, nrow = 2)
   return(p)
 }

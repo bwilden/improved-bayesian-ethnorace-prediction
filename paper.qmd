@@ -46,16 +46,11 @@ bper_plots[[3]]
 ```
 
 
-# Asian
+```{r}
+tar_load(bper_cal_plot)
 
-# Black
+bper_cal_plot
+```
 
-# Hispanic
-
-# White
-
-# AIAN / Other
-
-# Voting Sensitivity Simulation Study
 
 # References
