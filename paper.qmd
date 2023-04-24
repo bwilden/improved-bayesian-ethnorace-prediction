@@ -37,6 +37,15 @@ knitr::write_bib(.packages(), "packages.bib")
 
 # Overview
 
+```{r}
+tar_load(bper_plots)
+
+bper_plots[[1]]
+bper_plots[[2]]
+bper_plots[[3]]
+```
+
+
 # Asian
 
 # Black

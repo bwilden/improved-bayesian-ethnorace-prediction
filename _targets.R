@@ -91,12 +91,22 @@ list(
   ),
   tar_target(
     bper_tests,
-    pmap(.l = set_bisg_args(),
+    pmap_dfr(.l = set_bisg_args(),
          .f = classify_and_report,
          bper_data = bper_data,
          df = combined_voter_file |> 
-           slice_sample(n = 2e5),
+           slice_sample(n = 1e5),
          .progress = TRUE)
+  ),
+  tar_target(
+    bper_metrics,
+    calc_validation_results(bper_tests)
+  ),
+  tar_target(
+    bper_plots,
+    map(c("Accuracy", "Precision", "Recall"), 
+        make_metric_plot,
+        metric_df = bper_metrics)
   ),
   
   # Grumbach Sahn Replication

@@ -171,17 +171,31 @@ classify_and_report <- function(df,
     rec_white = rec_white
   )
   
-  return(lst(df, metric_df))
+  return(metric_df)
 }
-
-
-# classify_and_report(a, geography = "state", party = F, age = F, sex = F, bper_data = bper_data)
 
 set_bisg_args <- function() {
   bisg_args <- tibble(geography = c("state", "county", "zip", "place", "tract", "block")) |> 
     crossing(party = c(TRUE, FALSE),
-             age = c(TRUE, FALSE),
-             sex = c(TRUE, FALSE))
+             age = c(TRUE),
+             sex = c(TRUE))
   return(bisg_args)
 }
 
+
+calc_validation_results <- function(test_df) {
+  test_df <- test_df |> 
+    group_by(geography, party) |> 
+    summarise(across(where(is.numeric), mean)) |> 
+    pivot_longer(cols = where(is.numeric)) |> 
+    mutate(metric = case_when(name == "accuracy" ~ "Accuracy",
+                              str_detect(name, "prec") ~ "Precision",
+                              str_detect(name, "rec") ~ "Recall"),
+           race = sub("^[^_]*_", "", name) |> str_to_title(),
+           race = ifelse(race == "Aapi", "Asian", race),
+           geography = factor(str_to_title(geography),
+                              levels = c("State", "County", "Zip", "Place", "Tract", "Block")))
+  
+  return(test_df)
+}
+# calc_validation_results(bper_tests)
