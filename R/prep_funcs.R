@@ -78,7 +78,7 @@ split_voter_file <- function(voter_file, state, n_splits) {
   
   for (i in 1:length(voter_file_address)) {
     write_csv(voter_file_address[[i]],
-      file = here("bper", "data-raw", state, paste0(state, "_address_", i, ".csv")))
+      file = here("data-raw", state, paste0(state, "_address_", i, ".csv")))
   }
 }
 

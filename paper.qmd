@@ -52,5 +52,11 @@ tar_load(bper_cal_plot)
 bper_cal_plot
 ```
 
+```{r}
+tar_load(bias_prec_plots)
+
+bias_prec_plots[[5]]
+```
+
 
 # References

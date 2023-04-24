@@ -26,19 +26,38 @@ make_metric_plot <- function(metric_df, metric_name) {
   return(p)
 }
 
-
-
-make_calibration_plots <- function(cal_plot_data) {
-  p <- cal_plot_data %>% 
-    mutate(race = case_when(race == "aapi" ~ "Asian",
-                            TRUE ~ str_to_title(race))) %>% 
-    ggplot(aes(x = midpoint, y = Percent)) +
-    geom_line() +
-    geom_pointrange(aes(ymin = Lower, ymax = Upper)) +
-    geom_abline(slope = 1, intercept = 0, linetype = "dashed", size = .25) +
-    xlim(0, 100) +
-    ylim(0, 100) +
-    labs(y = "Observed Percent", x = "Predicted Probability Bin Midpoint") +
-    facet_wrap(~ race, nrow = 2)
+make_bias_prec_plot <- function(pred_df, bias_var) {
+  p <- pred_df |> 
+    filter(race %in% c("aapi", "black", "hispanic", "white")) |>
+    mutate(deciles = ntile(!!sym(bias_var), 100)) |>
+    group_by(deciles, race) |>
+    summarise(prop_miss = mean(race != pred_race, na.rm =TRUE)) |>
+    ggplot(aes(x = deciles, y = prop_miss)) +
+    geom_point(color = "grey") +
+    geom_smooth(se = FALSE, color = "red") +
+    facet_wrap(~race, ncol = 2) +
+    ylim(0, 1) +
+    labs(x = bias_var)
   return(p)
 }
+
+make_bias_recall_plot <- function(pred_df, bias_var) {
+  p <- pred_df |> 
+    filter(race == "black", pred_race %in% c("aapi", "black", "hispanic", "white")) |>
+    mutate(deciles = ntile(!!sym(bias_var), 100)) |>
+    group_by(deciles) |>
+    mutate(total = n()) |>
+    group_by(deciles, pred_race) |>
+    reframe(recall = n()/total) |>
+    distinct() |>
+    ggplot(aes(x = deciles, y = recall)) +
+    geom_point(color = "grey") +
+    geom_smooth(se = FALSE, color = "red") +
+    facet_wrap(~pred_race, ncol = 2) +
+    ylim(0, 1) +
+    labs(y = bias_var)
+  return(p)
+}
+
+# x = cut(median_income, breaks = seq(min(median_income, na.rm = TRUE),
+#                                     max(median_income, na.rm = TRUE), 1000), labels = FALSE))

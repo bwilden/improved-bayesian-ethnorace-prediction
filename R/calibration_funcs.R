@@ -10,4 +10,18 @@ create_calibration_plot_data <- function(bper_cal, race) {
   
   return(cal_data)
 }
-# create_calibration_plot_data(bper_cal = bper_cal, "white")
+
+make_calibration_plots <- function(cal_plot_data) {
+  p <- cal_plot_data %>% 
+    mutate(race = case_when(race == "aapi" ~ "Asian",
+                            TRUE ~ str_to_title(race))) %>% 
+    ggplot(aes(x = midpoint, y = Percent)) +
+    geom_line() +
+    geom_pointrange(aes(ymin = Lower, ymax = Upper)) +
+    geom_abline(slope = 1, intercept = 0, linetype = "dashed", size = .25) +
+    xlim(0, 100) +
+    ylim(0, 100) +
+    labs(y = "Observed Percent", x = "Predicted Probability Bin Midpoint") +
+    facet_wrap(~ race, nrow = 2)
+  return(p)
+}

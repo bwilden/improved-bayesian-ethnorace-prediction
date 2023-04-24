@@ -1,47 +1,6 @@
 
 
 
-
-# a <- predict_race_rethnicity(test_voter_file)
-# 
-# b <- predict_race_wru(test_voter_file,
-#                       names.to.use = 'surname, first',
-#                       census.geo = "block")
-# 
-# a <- impute_ethnorace(test_voter_file,
-#                       bper_data = bper_data,
-#                       year = 2020)
-# 
-# b |>
-#   filter(race %in% c("aapi", "black", "hispanic", "white")) |>
-#   mutate(income_dec = ntile(median_income, 100),
-#          x = cut(median_income, breaks = seq(min(median_income, na.rm = TRUE), 
-#                                              max(median_income, na.rm = TRUE), 1000), labels = FALSE)) |>
-#   group_by(income_dec, race) |>
-#   summarise(prop_miss = mean(race != pred_race, na.rm =TRUE), n = n()) |>
-#   ggplot(aes(x = income_dec, y = prop_miss)) +
-#   geom_point(color = "grey") +
-#   geom_smooth(se = FALSE, color = "red") +
-#   facet_wrap(~race, ncol = 2) +
-#   ylim(0, 1) +
-#   theme_bw()
-# 
-# b |> 
-#   filter(race == "black", pred_race %in% c("aapi", "black", "hispanic", "white")) |> 
-#   mutate(income_dec = ntile(median_income, 100)) |> 
-#   group_by(income_dec) |> 
-#   mutate(total = n()) |> 
-#   group_by(income_dec, pred_race) |> 
-#   reframe(recall = n()/total) |> 
-#   distinct() |>
-#   ggplot(aes(x = income_dec, y = recall)) +
-#   geom_point(color = "grey") +
-#   geom_smooth(se = FALSE, color = "red") +
-#   facet_wrap(~pred_race, ncol = 2) +
-#   ylim(0, 1) +
-#   theme_bw()
-
-
 find_largest_column <- function(df, num_cols) {
   cols <- df[tail(seq_along(df), num_cols)]
   max_col <- colnames(cols)[max.col(cols)]

@@ -109,9 +109,9 @@ list(
         metric_df = bper_metrics)
   ),
   tar_target(
-    bper_cal,
+    bper_predictions,
     bper::impute_ethnorace(combined_voter_file |>  
-                             slice_sample(n = 1e5), 
+                             slice_sample(n = 1e6), 
                              year = 2019,
                              bper_data = bper_data)
   ),
@@ -119,79 +119,85 @@ list(
     bper_cal_data,
     map_dfr(c("aapi", "black", "hispanic", "white"),
            create_calibration_plot_data,
-           bper_cal = bper_cal)
+           bper_cal = bper_predictions)
   ),
   tar_target(
     bper_cal_plot,
     make_calibration_plots(bper_cal_data)
   ),
+  tar_target(
+    bias_prec_plots,
+    map(c("pct_foreignborn", "pct_englishpoor", "median_income", "median_home_value", "pct_college"),
+        make_bias_prec_plot,
+        pred_df = bper_predictions)
+  )
   
   # Grumbach Sahn Replication
-  tar_target(
-    raw_dime_contribs,
-    list.files(path = here("data-raw", "dime"), pattern = "contribDB_*",
-               full.names = TRUE),
-    format = "file"
-  ),
-  tar_target(
-    raw_dime_recips,
-    here("data-raw", "dime", "dime_recipients_all_1979_2014.csv"),
-    format = "file"
-  ),
-  tar_target(
-    dime_contribs,
-    map_dfr(raw_dime_contribs, clean_contribs)
-  ),
-  tar_target(
-    dime_recips,
-    clean_recips(raw_dime_recips)
-  ),
-  tar_target(
-    bper_dimes,
-    calc_bper_dime(dime_contribs, dime_recips)
-  ),
-  tar_target(
-    wru_dimes,
-    calc_wru_dime(dime_contribs, dime_recips)
-  ),
-  tar_target(
-    dime_metric_tables,
-    create_dime_metric_tables(validation_results)
-  ),
-  # Grumbach Sahn Figures
-  tar_target(
-    gs_figs_data,
-    prep_gs_figs_data(bper_dimes, wru_dimes)
-  ),
-  tar_target(
-    gs_fig1,
-    create_gs_fig1(gs_figs_data$fig1_data)
-  ),
-  tar_target(
-    gs_fig2,
-    create_gs_fig2(gs_figs_data$fig2_data)
-  ),
-  tar_target(
-    gs_fig3,
-    create_gs_fig3(gs_figs_data$fig3_data)
-  ),
-  tar_target(
-    gs_fig4,
-    create_gs_fig4(gs_figs_data$fig4_data)
-  ),
-  tar_target(
-    gs_did_data,
-    rbind(
-      prep_gs_did_data(bper_dimes, "bper"),
-      prep_gs_did_data(wru_dimes, "wru")
-    )
-  ),
-  tar_target(
-    gs_did_results,
-    run_gs_did_models(gs_did_data)
-  ),
-  tar_target(
-    gs_fig5,
-    create_gs_fig5(gs_did_results)
-  )
+  # tar_target(
+  #   raw_dime_contribs,
+  #   list.files(path = here("data-raw", "dime"), pattern = "contribDB_*",
+  #              full.names = TRUE),
+  #   format = "file"
+  # ),
+  # tar_target(
+  #   raw_dime_recips,
+  #   here("data-raw", "dime", "dime_recipients_all_1979_2014.csv"),
+  #   format = "file"
+  # ),
+  # tar_target(
+  #   dime_contribs,
+  #   map_dfr(raw_dime_contribs, clean_contribs)
+  # ),
+  # tar_target(
+  #   dime_recips,
+  #   clean_recips(raw_dime_recips)
+  # ),
+  # tar_target(
+  #   bper_dimes,
+  #   calc_bper_dime(dime_contribs, dime_recips)
+  # ),
+  # tar_target(
+  #   wru_dimes,
+  #   calc_wru_dime(dime_contribs, dime_recips)
+  # ),
+  # tar_target(
+  #   dime_metric_tables,
+  #   create_dime_metric_tables(validation_results)
+  # ),
+  # # Grumbach Sahn Figures
+  # tar_target(
+  #   gs_figs_data,
+  #   prep_gs_figs_data(bper_dimes, wru_dimes)
+  # ),
+  # tar_target(
+  #   gs_fig1,
+  #   create_gs_fig1(gs_figs_data$fig1_data)
+  # ),
+  # tar_target(
+  #   gs_fig2,
+  #   create_gs_fig2(gs_figs_data$fig2_data)
+  # ),
+  # tar_target(
+  #   gs_fig3,
+  #   create_gs_fig3(gs_figs_data$fig3_data)
+  # ),
+  # tar_target(
+  #   gs_fig4,
+  #   create_gs_fig4(gs_figs_data$fig4_data)
+  # ),
+  # tar_target(
+  #   gs_did_data,
+  #   rbind(
+  #     prep_gs_did_data(bper_dimes, "bper"),
+  #     prep_gs_did_data(wru_dimes, "wru")
+  #   )
+  # ),
+  # tar_target(
+  #   gs_did_results,
+  #   run_gs_did_models(gs_did_data)
+  # ),
+  # tar_target(
+  #   gs_fig5,
+  #   create_gs_fig5(gs_did_results)
+  # )
 )
