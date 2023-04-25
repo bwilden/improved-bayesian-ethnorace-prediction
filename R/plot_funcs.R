@@ -41,9 +41,9 @@ make_bias_prec_plot <- function(pred_df, bias_var) {
   return(p)
 }
 
-make_bias_recall_plot <- function(pred_df, bias_var) {
+make_bias_recall_plot <- function(pred_df, bias_var, plot_race) {
   p <- pred_df |> 
-    filter(race == "black", pred_race %in% c("aapi", "black", "hispanic", "white")) |>
+    filter(race == plot_race, pred_race %in% c("aapi", "black", "hispanic", "white")) |>
     mutate(deciles = ntile(!!sym(bias_var), 100)) |>
     group_by(deciles) |>
     mutate(total = n()) |>
@@ -55,9 +55,11 @@ make_bias_recall_plot <- function(pred_df, bias_var) {
     geom_smooth(se = FALSE, color = "red") +
     facet_wrap(~pred_race, ncol = 2) +
     ylim(0, 1) +
-    labs(y = bias_var)
+    labs(x = bias_var, subtitle = paste0("Race: ", plot_race))
   return(p)
 }
+
+# make_bias_recall_plot(bper_predictions, "median_income", "aapi")
 
 # x = cut(median_income, breaks = seq(min(median_income, na.rm = TRUE),
 #                                     max(median_income, na.rm = TRUE), 1000), labels = FALSE))

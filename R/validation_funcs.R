@@ -157,4 +157,3 @@ calc_validation_results <- function(test_df) {
   
   return(test_df)
 }
-# calc_validation_results(bper_tests)

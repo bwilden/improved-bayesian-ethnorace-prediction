@@ -95,7 +95,7 @@ list(
          .f = classify_and_report,
          bper_data = bper_data,
          df = combined_voter_file |> 
-           slice_sample(n = 1e5),
+           slice_sample(n = 2e6),
          .progress = TRUE)
   ),
   tar_target(
@@ -127,9 +127,18 @@ list(
   ),
   tar_target(
     bias_prec_plots,
-    map(c("pct_foreignborn", "pct_englishpoor", "median_income", "median_home_value", "pct_college"),
+    map(c("pct_foreignborn", "pct_englishpoor", "median_income", 
+          "median_home_value", "pct_college"),
         make_bias_prec_plot,
         pred_df = bper_predictions)
+  ),
+  tar_target(
+    bias_recall_plots,
+    pmap(crossing(bias_var = c("pct_foreignborn", "pct_englishpoor", "median_income", 
+                               "median_home_value", "pct_college"),
+                  plot_race = c("aapi", "black", "hispanic", "white")),
+         make_bias_recall_plot,
+         pred_df = bper_predictions)
   )
   
   # Grumbach Sahn Replication
