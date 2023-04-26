@@ -7,6 +7,42 @@ find_largest_column <- function(df, num_cols) {
   return(max_col)
 }
 
+predict_race_wru <- function(df, ...) {
+  
+  df <- predict_race(voter.file = df, 
+                     # model = "BISG", 
+                     # names.to.use = "surname, first",
+                     # year = 2010,
+                     census.key = "5e4c2b8438222753a7f4753fa78855eca73b9950",
+                     ...)
+  
+  df$pred_race <- find_largest_column(df, 5)
+  
+  df <- df %>%
+    rename(
+      pred_white = pred.whi,
+      pred_black = pred.bla,
+      pred_hispanic = pred.his,
+      pred_aapi = pred.asi,
+      pred_other = pred.oth
+    ) %>%
+    mutate(
+      pred_race = case_when(
+        pred_race == "pred.whi" ~ "white",
+        pred_race == "pred.bla" ~ "black",
+        pred_race == "pred.his" ~ "hispanic",
+        pred_race == "pred.asi" ~ "aapi",
+        pred_race == "pred.oth" ~ "other"
+      ),
+      black = factor(ifelse(pred_race == "black", 1, 0)),
+      white = factor(ifelse(pred_race == "white", 1, 0)),
+      hispanic = factor(ifelse(pred_race == "hispanic", 1, 0)),
+      aapi = factor(ifelse(pred_race == "aapi", 1, 0)),
+      other = factor(ifelse(pred_race == "other", 1, 0))
+    )
+  
+  return(df)
+}
 
 
 classify_and_report <- function(df,

@@ -100,15 +100,13 @@ calc_wru_dime <- function(contribs_df, recips_df) {
   wru_full_contribs <- contribs_df %>% 
     filter(!(is.na(tract)),
            state %in% state_abbrvs) %>% 
-    predict_race_wru(census.geo = "tract", 
-                     sex = TRUE)
+    predict_race_wru(census.geo = "tract")
   
   wru_contribs <- rbind(wru_surname_only_contribs, wru_full_contribs) 
   
   wru_recips <- recips_df %>%
     predict_race_wru(surname.only = T,
-                    party = party,
-                    sex = T) %>%
+                    party = party) %>%
     select(bonica.rid, r_party = party, r_sex = sex, 
            r_pred_race = pred_race)
   
@@ -182,7 +180,7 @@ prep_gs_figs_data <- function(bper_df, wru_df) {
            Method = factor(Method, levels = c("wru", "bper"))) %>% 
     filter(pred_race %in% c("aapi", "black", "hispanic"))
   
-  pop_race_stats <- read_csv(here("bper", "sahn_grumbach", "Population Race Statistics (Pew).csv")) %>% 
+  pop_race_stats <- read_csv(here("sahn_grumbach", "Population Race Statistics (Pew).csv")) %>% 
     filter(race != "White",
            type %in% c("Registered Voters", "Members of Congress")) %>% 
     select(Race = race, Freq = pct.money, type)

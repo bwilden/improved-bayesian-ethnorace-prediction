@@ -59,10 +59,21 @@ bias_prec_plots[[1]]
 ```
 
 ```{r}
-tar_load(bias_recall_plots)
+# tar_load(bias_recall_plots)
 
 ```
 
+
+
+# Replication
+
+```{r}
+tar_read(gs_fig1)
+tar_read(gs_fig2)
+tar_read(gs_fig3)
+tar_read(gs_fig4)
+tar_read(gs_fig5)
+```
 
 
 # References
